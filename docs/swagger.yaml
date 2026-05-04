@@ -1,0 +1,4484 @@
+basePath: /
+definitions:
+  audit.AuditLogResponse:
+    properties:
+      action:
+        type: string
+      changes:
+        additionalProperties:
+          $ref: '#/definitions/audit.FieldChange'
+        type: object
+      created_at:
+        type: string
+      entity_id:
+        type: integer
+      entity_type:
+        type: string
+      error_message:
+        type: string
+      id:
+        type: integer
+      ip_address:
+        type: string
+      request_id:
+        type: string
+      status:
+        type: string
+      user_agent:
+        type: string
+      user_email:
+        type: string
+      user_id:
+        type: integer
+      user_role:
+        type: string
+    type: object
+  audit.FieldChange:
+    properties:
+      new: {}
+      old: {}
+    type: object
+  author.Author:
+    properties:
+      bio:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      imageUrl:
+        type: string
+      linkedinUrl:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  blog.Blog:
+    properties:
+      authorId:
+        type: integer
+      categoryId:
+        type: integer
+      content:
+        type: string
+      createdAt:
+        type: string
+      excerpt:
+        type: string
+      id:
+        type: integer
+      location:
+        type: string
+      metadata:
+        $ref: '#/definitions/blog.BlogMetadata'
+      publishDate:
+        type: string
+      reviewedAt:
+        type: string
+      reviewedBy:
+        type: integer
+      slug:
+        type: string
+      status:
+        $ref: '#/definitions/blog.BlogStatus'
+      tags:
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  blog.BlogListResponse:
+    properties:
+      blogs:
+        items:
+          $ref: '#/definitions/blog.Blog'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  blog.BlogMetadata:
+    properties:
+      keywords:
+        items:
+          type: string
+        type: array
+      metaDescription:
+        type: string
+      metaTitle:
+        type: string
+    type: object
+  blog.BlogResponse:
+    properties:
+      blog:
+        $ref: '#/definitions/blog.Blog'
+    type: object
+  blog.BlogStatus:
+    enum:
+    - draft
+    - review
+    - published
+    type: string
+    x-enum-varnames:
+    - StatusDraft
+    - StatusReview
+    - StatusPublished
+  blog.CreateBlogRequest:
+    properties:
+      authorId:
+        type: integer
+      categoryId:
+        type: integer
+      content:
+        minLength: 100
+        type: string
+      excerpt:
+        maxLength: 500
+        minLength: 50
+        type: string
+      location:
+        type: string
+      metadata:
+        $ref: '#/definitions/blog.BlogMetadata'
+      publishDate:
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/blog.BlogStatus'
+        enum:
+        - draft
+        - review
+        - published
+      tags:
+        type: string
+      title:
+        maxLength: 200
+        minLength: 10
+        type: string
+    required:
+    - authorId
+    - categoryId
+    - content
+    - excerpt
+    - publishDate
+    - status
+    - title
+    type: object
+  blog.UpdateBlogRequest:
+    properties:
+      authorId:
+        type: integer
+      categoryId:
+        type: integer
+      content:
+        minLength: 100
+        type: string
+      excerpt:
+        maxLength: 500
+        minLength: 50
+        type: string
+      location:
+        type: string
+      metadata:
+        $ref: '#/definitions/blog.BlogMetadata'
+      publishDate:
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/blog.BlogStatus'
+        enum:
+        - draft
+        - review
+        - published
+      tags:
+        type: string
+      title:
+        maxLength: 200
+        minLength: 10
+        type: string
+    type: object
+  category.Category:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      image_url:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      slug:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  form.BulkDeleteRequest:
+    properties:
+      ids:
+        items:
+          type: integer
+        type: array
+    type: object
+  form.CreateSubmissionRequest:
+    properties:
+      category:
+        $ref: '#/definitions/form.FormCategory'
+      data:
+        $ref: '#/definitions/form.FormData'
+      metadata:
+        $ref: '#/definitions/form.SubmissionMetadata'
+    type: object
+  form.DeleteResponse:
+    properties:
+      deletedCount:
+        type: integer
+      deletedId:
+        type: integer
+      deletedIds:
+        items:
+          type: integer
+        type: array
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  form.FormCategory:
+    enum:
+    - contact
+    - request-sample
+    type: string
+    x-enum-varnames:
+    - CategoryContact
+    - CategoryRequestSample
+  form.FormData:
+    additionalProperties: true
+    type: object
+  form.FormStatus:
+    enum:
+    - pending
+    - processed
+    - archived
+    type: string
+    x-enum-varnames:
+    - StatusPending
+    - StatusProcessed
+    - StatusArchived
+  form.FormSubmission:
+    properties:
+      category:
+        $ref: '#/definitions/form.FormCategory'
+      createdAt:
+        description: Timestamps
+        type: string
+      data:
+        allOf:
+        - $ref: '#/definitions/form.FormData'
+        description: Form-specific data stored as JSONB
+      id:
+        type: integer
+      metadata:
+        allOf:
+        - $ref: '#/definitions/form.SubmissionMetadata'
+        description: Metadata about the submission
+      notes:
+        type: string
+      processedAt:
+        description: Processing tracking
+        type: string
+      processedBy:
+        description: Admin user ID
+        type: integer
+      status:
+        $ref: '#/definitions/form.FormStatus'
+      updatedAt:
+        type: string
+    type: object
+  form.SubmissionMetadata:
+    properties:
+      ipAddress:
+        type: string
+      referrer:
+        type: string
+      submittedAt:
+        type: string
+      userAgent:
+        type: string
+    type: object
+  form.SubmissionResponse:
+    properties:
+      category:
+        $ref: '#/definitions/form.FormCategory'
+      createdAt:
+        type: string
+      message:
+        type: string
+      submissionId:
+        type: integer
+      success:
+        type: boolean
+    type: object
+  form.SubmissionStats:
+    properties:
+      byCategory:
+        additionalProperties:
+          format: int64
+          type: integer
+        type: object
+      byStatus:
+        additionalProperties:
+          format: int64
+          type: integer
+        type: object
+      recent:
+        additionalProperties:
+          format: int64
+          type: integer
+        type: object
+      total:
+        type: integer
+    type: object
+  handler.UpdateImageMetadataRequest:
+    properties:
+      is_active:
+        type: boolean
+      title:
+        type: string
+    type: object
+  press_release.CreatePressReleaseRequest:
+    properties:
+      authorId:
+        type: integer
+      categoryId:
+        type: integer
+      content:
+        minLength: 100
+        type: string
+      excerpt:
+        maxLength: 500
+        minLength: 50
+        type: string
+      location:
+        type: string
+      metadata:
+        $ref: '#/definitions/press_release.PressReleaseMetadata'
+      publishDate:
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/press_release.PressReleaseStatus'
+        enum:
+        - draft
+        - review
+        - published
+      tags:
+        type: string
+      title:
+        maxLength: 200
+        minLength: 10
+        type: string
+    required:
+    - authorId
+    - categoryId
+    - content
+    - excerpt
+    - publishDate
+    - status
+    - title
+    type: object
+  press_release.PressRelease:
+    properties:
+      authorId:
+        type: integer
+      categoryId:
+        type: integer
+      content:
+        type: string
+      createdAt:
+        type: string
+      excerpt:
+        type: string
+      id:
+        type: integer
+      location:
+        type: string
+      metadata:
+        $ref: '#/definitions/press_release.PressReleaseMetadata'
+      publishDate:
+        type: string
+      reviewedAt:
+        type: string
+      reviewedBy:
+        type: integer
+      slug:
+        type: string
+      status:
+        $ref: '#/definitions/press_release.PressReleaseStatus'
+      tags:
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  press_release.PressReleaseListResponse:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      pressReleases:
+        items:
+          $ref: '#/definitions/press_release.PressRelease'
+        type: array
+      total:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  press_release.PressReleaseMetadata:
+    properties:
+      keywords:
+        items:
+          type: string
+        type: array
+      metaDescription:
+        type: string
+      metaTitle:
+        type: string
+    type: object
+  press_release.PressReleaseResponse:
+    properties:
+      pressRelease:
+        $ref: '#/definitions/press_release.PressRelease'
+    type: object
+  press_release.PressReleaseStatus:
+    enum:
+    - draft
+    - review
+    - published
+    type: string
+    x-enum-varnames:
+    - StatusDraft
+    - StatusReview
+    - StatusPublished
+  press_release.UpdatePressReleaseRequest:
+    properties:
+      authorId:
+        type: integer
+      categoryId:
+        type: integer
+      content:
+        minLength: 100
+        type: string
+      excerpt:
+        maxLength: 500
+        minLength: 50
+        type: string
+      location:
+        type: string
+      metadata:
+        $ref: '#/definitions/press_release.PressReleaseMetadata'
+      publishDate:
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/press_release.PressReleaseStatus'
+        enum:
+        - draft
+        - review
+        - published
+      tags:
+        type: string
+      title:
+        maxLength: 200
+        minLength: 10
+        type: string
+    type: object
+  report.ChartMetadata:
+    properties:
+      chart_type:
+        description: bar, line, pie, etc.
+        type: string
+      created_at:
+        type: string
+      data_points:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      order:
+        type: integer
+      report:
+        $ref: '#/definitions/report.Report'
+      report_id:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  report.FAQ:
+    properties:
+      answer:
+        type: string
+      question:
+        type: string
+    type: object
+  report.KeyPlayer:
+    properties:
+      description:
+        type: string
+      marketShare:
+        type: string
+      name:
+        type: string
+      rank:
+        type: integer
+    type: object
+  report.MarketMetrics:
+    properties:
+      cagr:
+        type: string
+      cagrEndYear:
+        type: integer
+      cagrStartYear:
+        type: integer
+      currentRevenue:
+        type: string
+      currentYear:
+        type: integer
+      forecastRevenue:
+        type: string
+      forecastYear:
+        type: integer
+    type: object
+  report.Report:
+    properties:
+      author_ids:
+        description: Authors (JSON array of user IDs)
+        items:
+          type: integer
+        type: array
+      category_id:
+        type: integer
+      category_name:
+        type: string
+      created_at:
+        description: Timestamps
+        type: string
+      created_by:
+        description: User tracking (admin metadata)
+        type: integer
+      currency:
+        type: string
+      description:
+        type: string
+      discounted_price:
+        type: number
+      download_count:
+        type: integer
+      faqs:
+        description: FAQs
+        items:
+          $ref: '#/definitions/report.FAQ'
+        type: array
+      formats:
+        items:
+          type: string
+        type: array
+      geography:
+        items:
+          type: string
+        type: array
+      id:
+        type: integer
+      internal_notes:
+        type: string
+      is_featured:
+        type: boolean
+      key_players:
+        items:
+          $ref: '#/definitions/report.KeyPlayer'
+        type: array
+      market_metrics:
+        allOf:
+        - $ref: '#/definitions/report.MarketMetrics'
+        description: Market data
+      meta_description:
+        type: string
+      meta_keywords:
+        type: string
+      meta_title:
+        description: SEO Metadata
+        type: string
+      page_count:
+        description: Report details
+        type: integer
+      price:
+        description: Pricing
+        type: number
+      publish_date:
+        description: Publishing
+        type: string
+      sections:
+        allOf:
+        - $ref: '#/definitions/report.ReportSections'
+        description: Content sections
+      slug:
+        type: string
+      status:
+        description: Status and access
+        type: string
+      summary:
+        type: string
+      thumbnail_url:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+      view_count:
+        description: Statistics
+        type: integer
+    type: object
+  report.ReportImage:
+    description: Report image model for storing multiple images per report
+    properties:
+      created_at:
+        description: Timestamp when image was created
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      id:
+        description: Unique identifier
+        example: 1
+        type: integer
+      image_url:
+        description: URL to the image from external image service
+        example: https://example.com/images/chart-1.png
+        type: string
+      is_active:
+        description: Soft delete flag - false to hide without losing data
+        example: true
+        type: boolean
+      report:
+        allOf:
+        - $ref: '#/definitions/report.Report'
+        description: Foreign key relationship
+      report_id:
+        description: ID of the associated report
+        example: 123
+        type: integer
+      title:
+        description: Descriptive title for the image
+        example: Market Size Forecast 2024-2030
+        type: string
+      updated_at:
+        description: Timestamp when image was last updated
+        example: "2024-01-15T10:30:00Z"
+        type: string
+      uploaded_by:
+        description: ID of user who uploaded the image
+        example: 5
+        type: integer
+    type: object
+  report.ReportSections:
+    properties:
+      keyPlayers:
+        type: string
+      marketDetails:
+        type: string
+      tableOfContents:
+        type: string
+    type: object
+  report.ReportVersion:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      meta_description:
+        type: string
+      meta_keywords:
+        type: string
+      meta_title:
+        description: SEO Metadata (versioned)
+        type: string
+      published_at:
+        type: string
+      published_by:
+        description: User ID who published
+        type: integer
+      report:
+        $ref: '#/definitions/report.Report'
+      report_id:
+        type: integer
+      sections:
+        $ref: '#/definitions/report.ReportSections'
+      version_number:
+        type: integer
+    type: object
+  report.ReportWithRelations:
+    properties:
+      author:
+        $ref: '#/definitions/report.UserReference'
+      author_ids:
+        description: Authors (JSON array of user IDs)
+        items:
+          type: integer
+        type: array
+      category_id:
+        type: integer
+      category_name:
+        type: string
+      charts:
+        items:
+          $ref: '#/definitions/report.ChartMetadata'
+        type: array
+      created_at:
+        description: Timestamps
+        type: string
+      created_by:
+        description: User tracking (admin metadata)
+        type: integer
+      currency:
+        type: string
+      description:
+        type: string
+      discounted_price:
+        type: number
+      download_count:
+        type: integer
+      faqs:
+        description: FAQs
+        items:
+          $ref: '#/definitions/report.FAQ'
+        type: array
+      formats:
+        items:
+          type: string
+        type: array
+      geography:
+        items:
+          type: string
+        type: array
+      id:
+        type: integer
+      internal_notes:
+        type: string
+      is_featured:
+        type: boolean
+      key_players:
+        items:
+          $ref: '#/definitions/report.KeyPlayer'
+        type: array
+      market_metrics:
+        allOf:
+        - $ref: '#/definitions/report.MarketMetrics'
+        description: Market data
+      meta_description:
+        type: string
+      meta_keywords:
+        type: string
+      meta_title:
+        description: SEO Metadata
+        type: string
+      page_count:
+        description: Report details
+        type: integer
+      price:
+        description: Pricing
+        type: number
+      publish_date:
+        description: Publishing
+        type: string
+      sections:
+        allOf:
+        - $ref: '#/definitions/report.ReportSections'
+        description: Content sections
+      slug:
+        type: string
+      status:
+        description: Status and access
+        type: string
+      summary:
+        type: string
+      thumbnail_url:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+      versions:
+        items:
+          $ref: '#/definitions/report.ReportVersion'
+        type: array
+      view_count:
+        description: Statistics
+        type: integer
+    type: object
+  report.UserReference:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  response.Meta:
+    properties:
+      cursor:
+        type: string
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  response.Response:
+    properties:
+      data: {}
+      error:
+        type: string
+      meta:
+        $ref: '#/definitions/response.Meta'
+      success:
+        type: boolean
+    type: object
+  role.Permission:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
+  role.RoleInfo:
+    properties:
+      description:
+        type: string
+      display_name:
+        type: string
+      level:
+        description: Hierarchy level (higher = more permissions)
+        type: integer
+      name:
+        type: string
+      permissions:
+        items:
+          $ref: '#/definitions/role.Permission'
+        type: array
+    type: object
+  user.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      role:
+        enum:
+        - admin
+        - editor
+        - viewer
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - role
+    type: object
+  user.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  user.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        description: seconds
+        type: integer
+      refresh_token:
+        type: string
+      token_type:
+        type: string
+      user:
+        $ref: '#/definitions/user.UserResponse'
+    type: object
+  user.LogoutRequest:
+    properties:
+      refresh_token:
+        type: string
+    type: object
+  user.RefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  user.RefreshResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        description: seconds
+        type: integer
+      refresh_token:
+        type: string
+      token_type:
+        type: string
+      user:
+        $ref: '#/definitions/user.UserResponse'
+    type: object
+  user.UpdateUserRequest:
+    properties:
+      email:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      role:
+        enum:
+        - admin
+        - editor
+        - viewer
+        type: string
+    type: object
+  user.UserResponse:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      last_login_at:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
+      updated_at:
+        type: string
+    type: object
+host: 192.168.1.2:8081
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: RESTful API for healthcare market research reports and categories with
+    caching and pagination support
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: https://example.com/terms/
+  title: Healthcare Market Research API
+  version: "1.0"
+paths:
+  /api/v1/audit-logs:
+    get:
+      description: Get all audit logs with filtering and pagination (admin only)
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Filter by user ID
+        in: query
+        name: user_id
+        type: integer
+      - description: Filter by action (e.g., auth.login, user.create)
+        in: query
+        name: action
+        type: string
+      - description: Filter by entity type (e.g., user, report)
+        in: query
+        name: entity_type
+        type: string
+      - description: Filter by entity ID
+        in: query
+        name: entity_id
+        type: integer
+      - description: Filter by status (success or failure)
+        in: query
+        name: status
+        type: string
+      - description: Filter by start date (RFC3339 format)
+        in: query
+        name: start_date
+        type: string
+      - description: Filter by end date (RFC3339 format)
+        in: query
+        name: end_date
+        type: string
+      - description: Filter by IP address
+        in: query
+        name: ip_address
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/audit.AuditLogResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get all audit logs
+      tags:
+      - Audit
+  /api/v1/audit-logs/{id}:
+    get:
+      description: Get a specific audit log by ID (admin only)
+      parameters:
+      - description: Audit Log ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/audit.AuditLogResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get audit log by ID
+      tags:
+      - Audit
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with email and password
+      parameters:
+      - description: Login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/user.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/user.LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "429":
+          description: Too Many Requests
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: User login
+      tags:
+      - Authentication
+  /api/v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Invalidate refresh token
+      parameters:
+      - description: Refresh token to invalidate
+        in: body
+        name: logout
+        schema:
+          $ref: '#/definitions/user.LogoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: string
+                  type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: User logout
+      tags:
+      - Authentication
+  /api/v1/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Generate new access token using refresh token
+      parameters:
+      - description: Refresh token
+        in: body
+        name: refresh
+        required: true
+        schema:
+          $ref: '#/definitions/user.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/user.RefreshResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Refresh access token
+      tags:
+      - Authentication
+  /api/v1/authors:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of authors with optional search. Response
+        includes linkedinUrl for each author if set.
+      parameters:
+      - description: 'Page number (default: 1, min: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 20, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      - description: Search in name, role, and bio
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of authors with pagination metadata
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/author.Author'
+                  type: array
+                meta:
+                  $ref: '#/definitions/response.Meta'
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get all authors
+      tags:
+      - Authors
+    post:
+      consumes:
+      - application/json
+      description: Create a new author. Requires admin or editor role.
+      parameters:
+      - description: Author data (name is required with min 2 chars, role, bio, and
+          linkedinUrl are optional. linkedinUrl must be a valid HTTPS URL)
+        in: body
+        name: author
+        required: true
+        schema:
+          $ref: '#/definitions/author.Author'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created author
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/author.Author'
+              type: object
+        "400":
+          description: Bad request - invalid input or validation error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Create author
+      tags:
+      - Authors
+  /api/v1/authors/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an author by ID. Cannot delete if author is referenced in
+        any reports. Requires admin role.
+      parameters:
+      - description: Author ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Author deleted successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: string
+                  type: object
+              type: object
+        "400":
+          description: Bad request - invalid ID or author is referenced in reports
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Author not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Delete author
+      tags:
+      - Authors
+    get:
+      consumes:
+      - application/json
+      description: Get a single author by ID. Response includes linkedinUrl if set.
+      parameters:
+      - description: Author ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Author details
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/author.Author'
+              type: object
+        "400":
+          description: Bad request - invalid ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Author not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get single author
+      tags:
+      - Authors
+    put:
+      consumes:
+      - application/json
+      description: Update an existing author by ID. Supports partial updates. Requires
+        admin or editor role.
+      parameters:
+      - description: Author ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated author data (all fields are optional for partial updates.
+          linkedinUrl can be updated or cleared, must be a valid HTTPS URL if provided)
+        in: body
+        name: author
+        required: true
+        schema:
+          $ref: '#/definitions/author.Author'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated author
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/author.Author'
+              type: object
+        "400":
+          description: Bad request - invalid input or validation error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Author not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Update author
+      tags:
+      - Authors
+  /api/v1/authors/{id}/image:
+    delete:
+      consumes:
+      - application/json
+      description: Delete the profile image of an author. Requires admin or editor
+        role.
+      parameters:
+      - description: Author ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Image deleted successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: string
+                  type: object
+              type: object
+        "400":
+          description: Bad request - invalid ID or author has no image
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Author not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Delete author image
+      tags:
+      - Authors
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload or replace profile image for an author. Requires admin or
+        editor role.
+      parameters:
+      - description: Author ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 'Image file (max 10MB, allowed types: JPEG, PNG, WebP, GIF)'
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Author with updated image URL
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/author.Author'
+              type: object
+        "400":
+          description: Bad request - invalid ID, missing file, or validation error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Author not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Upload author image
+      tags:
+      - Authors
+  /api/v1/blogs:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of blogs with optional filtering
+      parameters:
+      - description: 'Filter by status: draft, review, published'
+        in: query
+        name: status
+        type: string
+      - description: Filter by category ID
+        in: query
+        name: categoryId
+        type: integer
+      - description: Filter by tags (comma-separated)
+        in: query
+        name: tags
+        type: string
+      - description: Filter by author ID
+        in: query
+        name: authorId
+        type: integer
+      - description: Filter by location
+        in: query
+        name: location
+        type: string
+      - description: Search in title, excerpt, content
+        in: query
+        name: search
+        type: string
+      - description: 'Page number (default: 1, min: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 20, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of blogs with pagination
+          schema:
+            $ref: '#/definitions/blog.BlogListResponse'
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get all blogs
+      tags:
+      - Blogs
+    post:
+      consumes:
+      - application/json
+      description: Create a new blog post
+      parameters:
+      - description: Blog data
+        in: body
+        name: blog
+        required: true
+        schema:
+          $ref: '#/definitions/blog.CreateBlogRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Blog created successfully
+          schema:
+            $ref: '#/definitions/blog.BlogResponse'
+        "400":
+          description: Bad request - invalid input or validation error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Create blog
+      tags:
+      - Blogs
+  /api/v1/blogs/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a blog post by ID
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Blog deleted successfully
+        "400":
+          description: Bad request - invalid ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Blog not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Delete blog
+      tags:
+      - Blogs
+    get:
+      consumes:
+      - application/json
+      description: Get a single blog post by ID
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Blog details
+          schema:
+            $ref: '#/definitions/blog.BlogResponse'
+        "400":
+          description: Bad request - invalid ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Blog not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get blog by ID
+      tags:
+      - Blogs
+    put:
+      consumes:
+      - application/json
+      description: Update an existing blog post
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Blog update data
+        in: body
+        name: blog
+        required: true
+        schema:
+          $ref: '#/definitions/blog.UpdateBlogRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Blog updated successfully
+          schema:
+            $ref: '#/definitions/blog.BlogResponse'
+        "400":
+          description: Bad request - invalid input or validation error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Blog not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Update blog
+      tags:
+      - Blogs
+  /api/v1/blogs/{id}/publish:
+    patch:
+      consumes:
+      - application/json
+      description: Change blog status to published
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Blog published successfully
+          schema:
+            $ref: '#/definitions/blog.BlogResponse'
+        "400":
+          description: Bad request - invalid ID or blog cannot be published
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Blog not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Publish blog
+      tags:
+      - Blogs
+  /api/v1/blogs/{id}/submit-review:
+    patch:
+      consumes:
+      - application/json
+      description: Change blog status from draft to review
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Blog submitted for review successfully
+          schema:
+            $ref: '#/definitions/blog.BlogResponse'
+        "400":
+          description: Bad request - invalid ID or blog cannot be submitted
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Blog not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Submit blog for review
+      tags:
+      - Blogs
+  /api/v1/blogs/{id}/unpublish:
+    patch:
+      consumes:
+      - application/json
+      description: Change blog status from published back to draft
+      parameters:
+      - description: Blog ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Blog unpublished successfully
+          schema:
+            $ref: '#/definitions/blog.BlogResponse'
+        "400":
+          description: Bad request - invalid ID or blog is not published
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Blog not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Unpublish blog
+      tags:
+      - Blogs
+  /api/v1/blogs/slug/{slug}:
+    get:
+      consumes:
+      - application/json
+      description: Get a single blog post by slug
+      parameters:
+      - description: Blog slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Blog details
+          schema:
+            $ref: '#/definitions/blog.BlogResponse'
+        "400":
+          description: Bad request - invalid slug
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Blog not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get blog by slug
+      tags:
+      - Blogs
+  /api/v1/categories:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of all active healthcare report categories
+      parameters:
+      - description: 'Page number (default: 1, min: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 20, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of categories with pagination metadata
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/category.Category'
+                  type: array
+                meta:
+                  $ref: '#/definitions/response.Meta'
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get all categories
+      tags:
+      - Categories
+  /api/v1/categories/{slug}:
+    get:
+      consumes:
+      - application/json
+      description: Get a single healthcare report category by its unique slug
+      parameters:
+      - description: Category slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Category details
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/category.Category'
+              type: object
+        "400":
+          description: Bad request - slug is required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Category not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get category by slug
+      tags:
+      - Categories
+  /api/v1/categories/{slug}/reports:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of reports belonging to a specific category
+      parameters:
+      - description: Category slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      - description: 'Page number (default: 1, min: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 20, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of reports in category with pagination metadata
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/report.ReportWithRelations'
+                  type: array
+                meta:
+                  $ref: '#/definitions/response.Meta'
+              type: object
+        "400":
+          description: Bad request - category slug is required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get reports by category slug
+      tags:
+      - Reports
+  /api/v1/forms/stats:
+    get:
+      consumes:
+      - application/json
+      description: Get statistics about form submissions (totals by category, status,
+        recent counts)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Submission statistics
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/form.SubmissionStats'
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get submission statistics
+      tags:
+      - Forms
+  /api/v1/forms/submissions:
+    delete:
+      consumes:
+      - application/json
+      description: Delete multiple form submissions by IDs
+      parameters:
+      - description: Array of submission IDs to delete
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/form.BulkDeleteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Submissions deleted successfully
+          schema:
+            $ref: '#/definitions/form.DeleteResponse'
+        "400":
+          description: Bad request - invalid input
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Bulk delete submissions
+      tags:
+      - Forms
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of form submissions with optional filtering
+      parameters:
+      - description: 'Filter by category: contact, request-sample'
+        in: query
+        name: category
+        type: string
+      - description: 'Filter by status: pending, processed, archived'
+        in: query
+        name: status
+        type: string
+      - description: Start date (ISO 8601 format)
+        in: query
+        name: dateFrom
+        type: string
+      - description: End date (ISO 8601 format)
+        in: query
+        name: dateTo
+        type: string
+      - description: Search in name, email, company
+        in: query
+        name: search
+        type: string
+      - description: 'Page number (default: 1, min: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 20, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Sort field: createdAt, company, name (default: createdAt)'
+        in: query
+        name: sortBy
+        type: string
+      - description: 'Sort order: asc, desc (default: desc)'
+        in: query
+        name: sortOrder
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of submissions with pagination
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/form.FormSubmission'
+                  type: array
+                meta:
+                  $ref: '#/definitions/response.Meta'
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get all form submissions
+      tags:
+      - Forms
+    post:
+      consumes:
+      - application/json
+      description: Submit a new form (contact or request-sample)
+      parameters:
+      - description: Form submission data
+        in: body
+        name: submission
+        required: true
+        schema:
+          $ref: '#/definitions/form.CreateSubmissionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Submission created successfully
+          schema:
+            $ref: '#/definitions/form.SubmissionResponse'
+        "400":
+          description: Bad request - invalid input or validation error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Create form submission
+      tags:
+      - Forms
+  /api/v1/forms/submissions/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a form submission by ID
+      parameters:
+      - description: Submission ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Submission deleted successfully
+          schema:
+            $ref: '#/definitions/form.DeleteResponse'
+        "400":
+          description: Bad request - invalid ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Submission not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Delete submission
+      tags:
+      - Forms
+    get:
+      consumes:
+      - application/json
+      description: Get a single form submission by ID
+      parameters:
+      - description: Submission ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Submission details
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/form.FormSubmission'
+              type: object
+        "400":
+          description: Bad request - invalid ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Submission not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get single submission
+      tags:
+      - Forms
+  /api/v1/forms/submissions/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Update the processing status of a form submission
+      parameters:
+      - description: Submission ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 'Status update (status: pending/processed/archived)'
+        in: body
+        name: request
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Status updated successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: string
+                  type: object
+              type: object
+        "400":
+          description: Bad request - invalid input
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Submission not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Update submission status
+      tags:
+      - Forms
+  /api/v1/forms/submissions/category/{category}:
+    get:
+      consumes:
+      - application/json
+      description: Get form submissions filtered by category (contact or request-sample)
+      parameters:
+      - description: 'Category: contact or request-sample'
+        in: path
+        name: category
+        required: true
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 20, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of submissions
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/form.FormSubmission'
+                  type: array
+                meta:
+                  $ref: '#/definitions/response.Meta'
+              type: object
+        "400":
+          description: Bad request - invalid category
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get submissions by category
+      tags:
+      - Forms
+  /api/v1/press-releases:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of press releases with optional filtering
+      parameters:
+      - description: 'Filter by status: draft, review, published'
+        in: query
+        name: status
+        type: string
+      - description: Filter by category ID
+        in: query
+        name: categoryId
+        type: integer
+      - description: Filter by tags (comma-separated)
+        in: query
+        name: tags
+        type: string
+      - description: Filter by author ID
+        in: query
+        name: authorId
+        type: integer
+      - description: Filter by location
+        in: query
+        name: location
+        type: string
+      - description: Search in title, excerpt, content
+        in: query
+        name: search
+        type: string
+      - description: 'Page number (default: 1, min: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 20, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of press releases with pagination
+          schema:
+            $ref: '#/definitions/press_release.PressReleaseListResponse'
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get all press releases
+      tags:
+      - PressReleases
+    post:
+      consumes:
+      - application/json
+      description: Create a new press release
+      parameters:
+      - description: Press release data
+        in: body
+        name: pressRelease
+        required: true
+        schema:
+          $ref: '#/definitions/press_release.CreatePressReleaseRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Press release created successfully
+          schema:
+            $ref: '#/definitions/press_release.PressReleaseResponse'
+        "400":
+          description: Bad request - invalid input or validation error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Create press release
+      tags:
+      - PressReleases
+  /api/v1/press-releases/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a press release by ID
+      parameters:
+      - description: Press release ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Press release deleted successfully
+        "400":
+          description: Bad request - invalid ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Press release not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Delete press release
+      tags:
+      - PressReleases
+    get:
+      consumes:
+      - application/json
+      description: Get a single press release by ID
+      parameters:
+      - description: Press release ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Press release details
+          schema:
+            $ref: '#/definitions/press_release.PressReleaseResponse'
+        "400":
+          description: Bad request - invalid ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Press release not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get press release by ID
+      tags:
+      - PressReleases
+    put:
+      consumes:
+      - application/json
+      description: Update an existing press release
+      parameters:
+      - description: Press release ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Press release update data
+        in: body
+        name: pressRelease
+        required: true
+        schema:
+          $ref: '#/definitions/press_release.UpdatePressReleaseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Press release updated successfully
+          schema:
+            $ref: '#/definitions/press_release.PressReleaseResponse'
+        "400":
+          description: Bad request - invalid input or validation error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Press release not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Update press release
+      tags:
+      - PressReleases
+  /api/v1/press-releases/{id}/publish:
+    patch:
+      consumes:
+      - application/json
+      description: Change press release status to published
+      parameters:
+      - description: Press release ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Press release published successfully
+          schema:
+            $ref: '#/definitions/press_release.PressReleaseResponse'
+        "400":
+          description: Bad request - invalid ID or press release cannot be published
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Press release not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Publish press release
+      tags:
+      - PressReleases
+  /api/v1/press-releases/{id}/submit-review:
+    patch:
+      consumes:
+      - application/json
+      description: Change press release status from draft to review
+      parameters:
+      - description: Press release ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Press release submitted for review successfully
+          schema:
+            $ref: '#/definitions/press_release.PressReleaseResponse'
+        "400":
+          description: Bad request - invalid ID or press release cannot be submitted
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Press release not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Submit press release for review
+      tags:
+      - PressReleases
+  /api/v1/press-releases/{id}/unpublish:
+    patch:
+      consumes:
+      - application/json
+      description: Change press release status from published back to draft
+      parameters:
+      - description: Press release ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Press release unpublished successfully
+          schema:
+            $ref: '#/definitions/press_release.PressReleaseResponse'
+        "400":
+          description: Bad request - invalid ID or press release is not published
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Press release not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Unpublish press release
+      tags:
+      - PressReleases
+  /api/v1/press-releases/slug/{slug}:
+    get:
+      consumes:
+      - application/json
+      description: Get a single press release by slug
+      parameters:
+      - description: Press release slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Press release details
+          schema:
+            $ref: '#/definitions/press_release.PressReleaseResponse'
+        "400":
+          description: Bad request - invalid slug
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Press release not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get press release by slug
+      tags:
+      - PressReleases
+  /api/v1/reports:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of healthcare market research reports with
+        optional filters for status, category, geography, and search. Admin users
+        can use additional filters for user tracking and date ranges. Admin-only fields
+        are automatically included in responses for authenticated admin/editor users.
+      parameters:
+      - description: 'Page number (default: 1, min: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 20, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      - description: Filter by status (draft or published)
+        in: query
+        name: status
+        type: string
+      - description: Filter by category slug
+        in: query
+        name: category
+        type: string
+      - description: Filter by geography (comma-separated, e.g., 'North America,Europe')
+        in: query
+        name: geography
+        type: string
+      - description: Search in title, summary, and description
+        in: query
+        name: search
+        type: string
+      - description: 'Admin only: Filter by creator user ID'
+        in: query
+        name: created_by
+        type: integer
+      - description: 'Admin only: Filter by last updater user ID'
+        in: query
+        name: updated_by
+        type: integer
+      - description: 'Admin only: Filter by created date (ISO 8601, e.g., 2024-01-01T00:00:00Z)'
+        in: query
+        name: created_after
+        type: string
+      - description: 'Admin only: Filter by created date (ISO 8601)'
+        in: query
+        name: created_before
+        type: string
+      - description: 'Admin only: Filter by updated date (ISO 8601)'
+        in: query
+        name: updated_after
+        type: string
+      - description: 'Admin only: Filter by updated date (ISO 8601)'
+        in: query
+        name: updated_before
+        type: string
+      - description: 'Admin only: Filter by published date (ISO 8601)'
+        in: query
+        name: published_after
+        type: string
+      - description: 'Admin only: Filter by published date (ISO 8601)'
+        in: query
+        name: published_before
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of reports with pagination metadata. Admin fields (created_by,
+            updated_by, internal_notes) are included only for authenticated admin/editor
+            users.
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/report.Report'
+                  type: array
+                meta:
+                  $ref: '#/definitions/response.Meta'
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get all reports with optional filters
+      tags:
+      - Reports
+    post:
+      consumes:
+      - application/json
+      description: Create a new healthcare market research report. Automatically sets
+        created_by and updated_by to the authenticated user. Requires admin or editor
+        role.
+      parameters:
+      - description: Report data
+        in: body
+        name: report
+        required: true
+        schema:
+          $ref: '#/definitions/report.Report'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created report with auto-populated admin tracking fields
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/report.Report'
+              type: object
+        "400":
+          description: Bad request - invalid input
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new report
+      tags:
+      - Reports
+  /api/v1/reports/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a healthcare market research report by ID. Permanently removes
+        the report and all associated data. Requires admin role.
+      parameters:
+      - description: Report ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Report deleted successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: string
+                  type: object
+              type: object
+        "400":
+          description: Bad request - invalid ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Report not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a report
+      tags:
+      - Reports
+    put:
+      consumes:
+      - application/json
+      description: Update an existing healthcare market research report by ID. Automatically
+        updates updated_by field. Creates version history when status changes to 'published'.
+        Requires admin or editor role.
+      parameters:
+      - description: Report ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated report data
+        in: body
+        name: report
+        required: true
+        schema:
+          $ref: '#/definitions/report.Report'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated report with auto-updated admin tracking fields
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/report.Report'
+              type: object
+        "400":
+          description: Bad request - invalid input
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Report not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Update a report
+      tags:
+      - Reports
+  /api/v1/reports/{reportId}/images:
+    get:
+      consumes:
+      - application/json
+      description: Get all images for a report with optional active filter. Admin/editor
+        only.
+      parameters:
+      - description: Report ID
+        in: path
+        name: reportId
+        required: true
+        type: integer
+      - description: Filter by active status (true = only active images)
+        in: query
+        name: active
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of images
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/report.ReportImage'
+                  type: array
+              type: object
+        "400":
+          description: Bad request - invalid report ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List report images
+      tags:
+      - Report Images
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload an image (chart, graph, diagram) for a report. Admin/editor
+        only.
+      parameters:
+      - description: Report ID
+        in: path
+        name: reportId
+        required: true
+        type: integer
+      - description: 'Image file (max 10MB, allowed types: JPEG, PNG, WebP, GIF)'
+        in: formData
+        name: image
+        required: true
+        type: file
+      - description: Image title (optional, max 255 chars)
+        in: formData
+        name: title
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Image uploaded successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/report.ReportImage'
+              type: object
+        "400":
+          description: Bad request - invalid input or validation error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Report not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Upload report image
+      tags:
+      - Report Images
+  /api/v1/reports/{slug}:
+    get:
+      consumes:
+      - application/json
+      description: Get a single healthcare market research report by its unique slug
+        or numeric ID. If the parameter is numeric, it will be treated as an ID; otherwise,
+        it will be treated as a slug.
+      parameters:
+      - description: Report slug or ID
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Report details with relations
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/report.ReportWithRelations'
+              type: object
+        "400":
+          description: Bad request - slug or ID is required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Report not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get report by slug or ID
+      tags:
+      - Reports
+  /api/v1/reports/images/{imageId}:
+    delete:
+      consumes:
+      - application/json
+      description: Soft delete an image (sets is_active=false). Admin/editor only.
+      parameters:
+      - description: Image ID
+        in: path
+        name: imageId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Image deleted successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: string
+                  type: object
+              type: object
+        "400":
+          description: Bad request - invalid image ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Image not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Delete report image
+      tags:
+      - Report Images
+    get:
+      consumes:
+      - application/json
+      description: Get a single report image by ID. Admin/editor only.
+      parameters:
+      - description: Image ID
+        in: path
+        name: imageId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Image details
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/report.ReportImage'
+              type: object
+        "400":
+          description: Bad request - invalid image ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Image not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get single report image
+      tags:
+      - Report Images
+    patch:
+      consumes:
+      - application/json
+      description: Update image title and/or is_active status. Supports partial updates.
+        Admin/editor only.
+      parameters:
+      - description: Image ID
+        in: path
+        name: imageId
+        required: true
+        type: integer
+      - description: Metadata to update (all fields are optional for partial updates)
+        in: body
+        name: metadata
+        required: true
+        schema:
+          $ref: '#/definitions/handler.UpdateImageMetadataRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated image
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/report.ReportImage'
+              type: object
+        "400":
+          description: Bad request - invalid input or validation error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Image not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Update report image metadata
+      tags:
+      - Report Images
+  /api/v1/roles:
+    get:
+      description: Get all available roles with their permissions and descriptions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/role.RoleInfo'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get all roles
+      tags:
+      - Roles
+  /api/v1/roles/{name}:
+    get:
+      description: Get detailed information about a specific role
+      parameters:
+      - description: Role name (admin, editor, or viewer)
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/role.RoleInfo'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get role by name
+      tags:
+      - Roles
+  /api/v1/search:
+    get:
+      consumes:
+      - application/json
+      description: Search for healthcare market research reports by query text (searches
+        in title, description, and summary)
+      parameters:
+      - description: Search query text
+        in: query
+        name: q
+        required: true
+        type: string
+      - description: 'Page number (default: 1, min: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 20, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Search results with pagination metadata
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/report.ReportWithRelations'
+                  type: array
+                meta:
+                  $ref: '#/definitions/response.Meta'
+              type: object
+        "400":
+          description: Bad request - search query is required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Search reports
+      tags:
+      - Reports
+  /api/v1/users:
+    get:
+      description: Get all users with pagination (admin only)
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/user.UserResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get all users
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Create a new user (admin only)
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/user.UserResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Create a new user
+      tags:
+      - Users
+  /api/v1/users/{id}:
+    delete:
+      description: Soft-delete a user (admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: string
+                  type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Delete a user
+      tags:
+      - Users
+    get:
+      description: Get a specific user by their ID (admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/user.UserResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get user by ID
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Update a user's information (admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User data to update
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: string
+                  type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Update a user
+      tags:
+      - Users
+  /api/v1/users/by-role/{role}:
+    get:
+      description: Get all users with a specific role (admin only)
+      parameters:
+      - description: Role name (admin, editor, or viewer)
+        in: path
+        name: role
+        required: true
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/user.UserResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get users by role
+      tags:
+      - Users
+  /api/v1/users/me:
+    get:
+      description: Get the currently authenticated user's information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/user.UserResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get current user
+      tags:
+      - Users
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Check if the API is running and healthy
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: API is healthy
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: string
+                  type: object
+              type: object
+      summary: Health check
+      tags:
+      - Health
+schemes:
+- http
+- https
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
+tags:
+- description: Health check endpoints
+  name: Health
+- description: User authentication and token management
+  name: Authentication
+- description: User management operations
+  name: Users
+- description: Operations related to healthcare market research reports
+  name: Reports
+- description: Operations related to report categories and hierarchies
+  name: Categories
+- description: Operations related to report authors and analysts
+  name: Authors
+- description: Audit log management and tracking
+  name: Audit
+- description: Role and permission information
+  name: Roles
+- description: Form submission management (contact forms, sample requests)
+  name: Forms
+- description: Internal image management for reports (admin/editor only)
+  name: Report Images
+- description: Blog post management and publishing
+  name: Blogs
+- description: Press release management and publishing
+  name: PressReleases

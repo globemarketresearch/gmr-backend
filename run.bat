@@ -1,0 +1,3 @@
+@echo off
+echo Starting Healthcare Market Research API...
+go run cmd/api/main.go
