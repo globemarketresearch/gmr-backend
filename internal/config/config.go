@@ -129,11 +129,11 @@ func Load() *Config {
 			R2PublicURL:       getEnv("R2_PUBLIC_URL", ""),
 		},
 		Email: EmailConfig{
-			From:         getEnv("EMAIL_FROM", ""),
-			NotifyTo:     getEnv("EMAIL_NOTIFICATION_TO", ""),
+			From:         os.Getenv("EMAIL_FROM"),
+			NotifyTo:     os.Getenv("EMAIL_NOTIFICATION_TO"),
 			CC:           os.Getenv("EMAIL_CC"),
 			ClientURL:    getEnv("CLIENT_URL", "https://globemarketresearch.com"),
-			ResendAPIKey: getEnv("RESEND_API_KEY", ""),
+			ResendAPIKey: os.Getenv("RESEND_API_KEY"),
 		},
 		PayPal: PayPalConfig{
 			ClientID:     getEnv("PAYPAL_CLIENT_ID", ""),
