@@ -32,14 +32,11 @@ type StripeConfig struct {
 }
 
 type EmailConfig struct {
-	Host      string // SMTP_HOST
-	Port      int    // SMTP_PORT (default 587)
-	User      string // SMTP_USER
-	Password  string // SMTP_PASSWORD
-	From      string // SMTP_FROM
-	NotifyTo  string // EMAIL_NOTIFICATION_TO
-	CC        string // EMAIL_CC
-	ClientURL string // CLIENT_URL (e.g. https://globemarketresearch.com)
+	From         string // EMAIL_FROM
+	NotifyTo     string // EMAIL_NOTIFICATION_TO
+	CC           string // EMAIL_CC
+	ClientURL    string // CLIENT_URL (e.g. https://globemarketresearch.com)
+	ResendAPIKey string // RESEND_API_KEY
 }
 
 type DatabaseConfig struct {
@@ -80,11 +77,6 @@ type CloudflareConfig struct {
 }
 
 func Load() *Config {
-	smtpPort, err := strconv.Atoi(getEnv("SMTP_PORT", "587"))
-	if err != nil {
-		smtpPort = 587
-	}
-
 	redisDB, err := strconv.Atoi(getEnv("REDIS_DB", "0"))
 	if err != nil {
 		redisDB = 0
@@ -137,14 +129,11 @@ func Load() *Config {
 			R2PublicURL:       getEnv("R2_PUBLIC_URL", ""),
 		},
 		Email: EmailConfig{
-			Host:      getEnv("SMTP_HOST", "smtp.gmail.com"),
-			Port:      smtpPort,
-			User:      getEnv("SMTP_USER", ""),
-			Password:  getEnv("SMTP_PASSWORD", ""),
-			From:      getEnv("SMTP_FROM", ""),
-			NotifyTo:  getEnv("EMAIL_NOTIFICATION_TO", ""),
-			CC:        os.Getenv("EMAIL_CC"),
-			ClientURL: getEnv("CLIENT_URL", "https://globemarketresearch.com"),
+			From:         getEnv("EMAIL_FROM", ""),
+			NotifyTo:     getEnv("EMAIL_NOTIFICATION_TO", ""),
+			CC:           os.Getenv("EMAIL_CC"),
+			ClientURL:    getEnv("CLIENT_URL", "https://globemarketresearch.com"),
+			ResendAPIKey: getEnv("RESEND_API_KEY", ""),
 		},
 		PayPal: PayPalConfig{
 			ClientID:     getEnv("PAYPAL_CLIENT_ID", ""),

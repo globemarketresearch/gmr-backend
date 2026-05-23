@@ -97,7 +97,7 @@ func main() {
 	// Initialize logger
 	logger.Init(cfg.Environment)
 	logger.Info("Starting Healthcare Market Research API", "environment", cfg.Environment)
-	logger.Info("SMTP config loaded", "host", cfg.Email.Host, "port", cfg.Email.Port, "user", cfg.Email.User, "from", cfg.Email.From, "notify_to", cfg.Email.NotifyTo)
+	logger.Info("Email provider: Resend", "from", cfg.Email.From, "notify_to", cfg.Email.NotifyTo)
 
 	// Connect to database
 	if err := db.Connect(cfg); err != nil {
@@ -140,7 +140,7 @@ func main() {
 	reportService := service.NewReportService(reportRepo, reportImageRepo, cloudflareService)
 	authorService := service.NewAuthorService(authorRepo, cloudflareService)
 	auditService := service.NewAuditService(auditRepo)
-	emailService := email.NewSMTPEmailService(&cfg.Email)
+	emailService := email.NewResendEmailService(&cfg.Email)
 	formService := service.NewFormService(formRepo, emailService)
 	paypalClient := paypal.NewClient(&cfg.PayPal)
 	stripeClient := stripe.NewClient(&cfg.Stripe)
