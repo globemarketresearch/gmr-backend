@@ -97,6 +97,7 @@ func main() {
 	// Initialize logger
 	logger.Init(cfg.Environment)
 	logger.Info("Starting Healthcare Market Research API", "environment", cfg.Environment)
+	logger.Info("SMTP config loaded", "host", cfg.Email.Host, "port", cfg.Email.Port, "user", cfg.Email.User, "from", cfg.Email.From, "notify_to", cfg.Email.NotifyTo)
 
 	// Connect to database
 	if err := db.Connect(cfg); err != nil {
