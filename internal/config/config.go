@@ -39,7 +39,7 @@ type EmailConfig struct {
 	From      string // SMTP_FROM
 	NotifyTo  string // EMAIL_NOTIFICATION_TO
 	CC        string // EMAIL_CC
-	ClientURL string // CLIENT_URL (e.g. https://healthcareforesights.com)
+	ClientURL string // CLIENT_URL (e.g. https://globemarketresearch.com)
 }
 
 type DatabaseConfig struct {
@@ -143,8 +143,8 @@ func Load() *Config {
 			Password:  getEnv("SMTP_PASSWORD", ""),
 			From:      getEnv("SMTP_FROM", ""),
 			NotifyTo:  getEnv("EMAIL_NOTIFICATION_TO", ""),
-			CC:        getEnv("EMAIL_CC", "frank.g@custommarketinsights.com"),
-			ClientURL: getEnv("CLIENT_URL", "https://healthcareforesights.com"),
+			CC:        os.Getenv("EMAIL_CC"),
+			ClientURL: getEnv("CLIENT_URL", "https://globemarketresearch.com"),
 		},
 		PayPal: PayPalConfig{
 			ClientID:     getEnv("PAYPAL_CLIENT_ID", ""),

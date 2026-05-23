@@ -70,7 +70,7 @@ func buildClientConfirmationEmail(submission *form.FormSubmission) (subject, bod
 
 	switch submission.Category {
 	case form.CategoryContact:
-		subject = "We received your message — HealthcareForesights"
+		subject = "We received your message — Globe Market Research"
 		body = fmt.Sprintf(`<!DOCTYPE html>
 <html>
 <body style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:0 auto;padding:20px">
@@ -78,8 +78,8 @@ func buildClientConfirmationEmail(submission *form.FormSubmission) (subject, bod
   <p>Dear %s,</p>
   <p>We have received your message and our team will get back to you shortly.</p>
   <p>Your reference number is <strong>#%d</strong>. Please keep it for your records.</p>
-  <p>If you have any urgent queries, feel free to reach us at <a href="mailto:support@healthcareforesights.com">support@healthcareforesights.com</a>.</p>
-  <p>Thank you for reaching out to HealthcareForesights!</p>
+  <p>If you have any urgent queries, feel free to reach us at <a href="mailto:sales@globemarketresearch.com">sales@globemarketresearch.com</a>.</p>
+  <p>Thank you for reaching out to Globe Market Research!</p>
 </body>
 </html>`, fullName, submission.ID)
 
@@ -113,13 +113,13 @@ func buildClientConfirmationEmail(submission *form.FormSubmission) (subject, bod
   </div>`, schedulingRows)
 		}
 
-		subject = "Demo Request Received — HealthcareForesights"
+		subject = "Demo Request Received — Globe Market Research"
 		body = fmt.Sprintf(`<!DOCTYPE html>
 <html>
 <body style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:0 auto;padding:20px">
   <h2 style="color:#1a73e8">Your Demo Request is Confirmed!</h2>
   <p>Dear %s,</p>
-  <p>Thank you for your interest in HealthcareForesights! We have received your demo request and our team will reach out to you within <strong>24 hours</strong> to confirm your session.%s</p>
+  <p>Thank you for your interest in Globe Market Research! We have received your demo request and our team will reach out to you within <strong>24 hours</strong> to confirm your session.%s</p>
   <p>Your reference number is <strong>#%d</strong>.</p>
   <p>During the demo, you can expect:</p>
   <ul>
@@ -128,14 +128,14 @@ func buildClientConfirmationEmail(submission *form.FormSubmission) (subject, bod
     <li>Overview of subscription options and pricing</li>
     <li>Q&amp;A with our product experts</li>
   </ul>
-  <p>If you need to reschedule or have any questions, contact us at <a href="mailto:support@healthcareforesights.com">support@healthcareforesights.com</a>.</p>
+  <p>If you need to reschedule or have any questions, contact us at <a href="mailto:sales@globemarketresearch.com">sales@globemarketresearch.com</a>.</p>
   <p>We look forward to speaking with you!</p>
 </body>
 </html>`, fullName, schedulingSection, submission.ID)
 
 	default:
 		reportTitle := strVal(submission.Data["reportTitle"])
-		subject = "Sample Request Received — HealthcareForesights"
+		subject = "Sample Request Received — Globe Market Research"
 		body = fmt.Sprintf(`<!DOCTYPE html>
 <html>
 <body style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:0 auto;padding:20px">
@@ -143,8 +143,8 @@ func buildClientConfirmationEmail(submission *form.FormSubmission) (subject, bod
   <p>Dear %s,</p>
   <p>Thank you for your interest in <strong>%s</strong>. We have received your sample request and will send the sample report to your email within 1–2 business days.</p>
   <p>Your reference number is <strong>#%d</strong>. Please keep it for your records.</p>
-  <p>For any questions, contact us at <a href="mailto:support@healthcareforesights.com">support@healthcareforesights.com</a>.</p>
-  <p>Thank you for choosing HealthcareForesights!</p>
+  <p>For any questions, contact us at <a href="mailto:sales@globemarketresearch.com">sales@globemarketresearch.com</a>.</p>
+  <p>Thank you for choosing Globe Market Research!</p>
 </body>
 </html>`, fullName, reportTitle, submission.ID)
 	}
@@ -313,8 +313,8 @@ func (s *smtpEmailService) SendOrderConfirmation(o *order.Order) error {
     <tr><td style="background:#f5f5f5"><strong>Date</strong></td><td>%s</td></tr>
   </table>
   <p>Your report will be delivered to <strong>%s</strong> within <strong>2–3 business days</strong>.</p>
-  <p>If you have any questions, please contact us at <a href="mailto:support@healthcareforesights.com">support@healthcareforesights.com</a>.</p>
-  <p>Thank you for choosing HealthcareForesights!</p>
+  <p>If you have any questions, please contact us at <a href="mailto:sales@globemarketresearch.com">sales@globemarketresearch.com</a>.</p>
+  <p>Thank you for choosing Globe Market Research!</p>
 </body>
 </html>`,
 		o.CustomerName,
@@ -365,7 +365,7 @@ func (s *smtpEmailService) SendOrderAdminNotification(o *order.Order) error {
     <tr><td style="background:#f5f5f5"><strong>Date</strong></td><td>%s</td></tr>
   </table>
   <p style="margin-top:20px">
-    <a href="https://admin.healthcareforesights.com/orders/%d" style="background:#1a73e8;color:#fff;padding:10px 20px;text-decoration:none;border-radius:4px">View Order in Admin</a>
+    <a href="https://admin.globemarketresearch.com/orders/%d" style="background:#1a73e8;color:#fff;padding:10px 20px;text-decoration:none;border-radius:4px">View Order in Admin</a>
   </p>
 </body>
 </html>`,
