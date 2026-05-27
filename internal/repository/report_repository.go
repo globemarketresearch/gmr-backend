@@ -73,7 +73,7 @@ func NewReportRepository(db *gorm.DB, authorRepo AuthorRepository) ReportReposit
 }
 
 func (r *reportRepository) GetAll(page, limit int) ([]report.Report, int64, error) {
-	var reports []report.Report
+	reports := make([]report.Report, 0) // non-nil so empty results serialize as [] not null
 	var total int64
 
 	offset := (page - 1) * limit
@@ -99,7 +99,7 @@ func (r *reportRepository) GetAll(page, limit int) ([]report.Report, int64, erro
 }
 
 func (r *reportRepository) GetAllWithFilters(filters ReportFilters) ([]report.Report, int64, error) {
-	var reports []report.Report
+	reports := make([]report.Report, 0) // non-nil so empty results serialize as [] not null
 	var total int64
 
 	offset := (filters.Page - 1) * filters.Limit
@@ -268,7 +268,7 @@ func (r *reportRepository) GetBySlug(slug string) (*report.ReportWithRelations, 
 }
 
 func (r *reportRepository) GetByCategorySlug(categorySlug string, page, limit int) ([]report.Report, int64, error) {
-	var reports []report.Report
+	reports := make([]report.Report, 0) // non-nil so empty results serialize as [] not null
 	var total int64
 
 	offset := (page - 1) * limit
@@ -298,7 +298,7 @@ func (r *reportRepository) GetByCategorySlug(categorySlug string, page, limit in
 }
 
 func (r *reportRepository) GetByAuthorID(authorID uint, page, limit int) ([]report.Report, int64, error) {
-	var reports []report.Report
+	reports := make([]report.Report, 0) // non-nil so empty results serialize as [] not null
 	var total int64
 	offset := (page - 1) * limit
 
@@ -331,7 +331,7 @@ func (r *reportRepository) GetByAuthorID(authorID uint, page, limit int) ([]repo
 }
 
 func (r *reportRepository) Search(query string, page, limit int) ([]report.Report, int64, error) {
-	var reports []report.Report
+	reports := make([]report.Report, 0) // non-nil so empty results serialize as [] not null
 	var total int64
 
 	offset := (page - 1) * limit
