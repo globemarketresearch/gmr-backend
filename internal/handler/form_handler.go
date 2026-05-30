@@ -163,8 +163,12 @@ func (h *FormHandler) GetByID(c *fiber.Ctx) error {
 // @Router /api/v1/forms/submissions/category/{category} [get]
 func (h *FormHandler) GetByCategory(c *fiber.Ctx) error {
 	category := c.Params("category")
-	if category != "contact" && category != "request-sample" && category != "request-customization" && category != "schedule-demo" {
-		return response.BadRequest(c, "Invalid category: must be 'contact', 'request-sample', 'request-customization', or 'schedule-demo'")
+	validCategories := map[string]bool{
+		"contact": true, "request-sample": true, "request-customization": true,
+		"schedule-demo": true, "newsletter": true, "publish-news": true,
+	}
+	if !validCategories[category] {
+		return response.BadRequest(c, "Invalid category: must be one of contact, request-sample, request-customization, schedule-demo, newsletter, publish-news")
 	}
 
 	page, _ := strconv.Atoi(c.Query("page", "1"))

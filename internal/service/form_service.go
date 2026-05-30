@@ -33,8 +33,16 @@ func NewFormService(repo repository.FormRepository, emailSvc email.EmailService)
 
 func (s *formService) Create(req *form.CreateSubmissionRequest) (*form.SubmissionResponse, error) {
 	// Validate category
-	if req.Category != form.CategoryContact && req.Category != form.CategoryRequestSample && req.Category != form.CategoryRequestCustomization && req.Category != form.CategoryScheduleDemo {
-		return nil, fmt.Errorf("invalid category: must be 'contact', 'request-sample', 'request-customization', or 'schedule-demo'")
+	validCategories := map[form.FormCategory]bool{
+		form.CategoryContact:              true,
+		form.CategoryRequestSample:        true,
+		form.CategoryRequestCustomization: true,
+		form.CategoryScheduleDemo:         true,
+		form.CategoryNewsletter:           true,
+		form.CategoryPublishNews:          true,
+	}
+	if !validCategories[req.Category] {
+		return nil, fmt.Errorf("invalid category: must be one of contact, request-sample, request-customization, schedule-demo, newsletter, publish-news")
 	}
 
 	// Validate required fields based on category
@@ -78,7 +86,15 @@ func (s *formService) Create(req *form.CreateSubmissionRequest) (*form.Submissio
 }
 
 func (s *formService) validateFormData(category form.FormCategory, data form.FormData) error {
-	// Common required fields
+	// Newsletter and publish-news only require email
+	if category == form.CategoryNewsletter || category == form.CategoryPublishNews {
+		if data["email"] == nil || data["email"] == "" {
+			return fmt.Errorf("email is required")
+		}
+		return nil
+	}
+
+	// Common required fields for all other categories
 	if data["fullName"] == nil || data["fullName"] == "" {
 		return fmt.Errorf("fullName is required")
 	}
