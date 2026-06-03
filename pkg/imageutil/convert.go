@@ -8,7 +8,8 @@ import (
 	"os/exec"
 )
 
-// ConvertToWebP converts any image (JPEG, PNG, GIF, WebP, TIFF, BMP) to WebP at 85% quality.
+// ConvertToWebP converts any image (JPEG, PNG, GIF, WebP, TIFF, BMP) to lossless WebP.
+// Lossless mode preserves all detail — critical for charts, text, and line art.
 // Requires the cwebp binary (apt install webp / brew install webp / winget install WebPTools).
 func ConvertToWebP(r io.Reader) ([]byte, error) {
 	data, err := io.ReadAll(r)
@@ -31,7 +32,7 @@ func ConvertToWebP(r io.Reader) ([]byte, error) {
 	defer os.Remove(tmpOutPath)
 
 	var stderr bytes.Buffer
-	cmd := exec.Command("cwebp", "-q", "85", "-quiet", tmpIn.Name(), "-o", tmpOutPath)
+	cmd := exec.Command("cwebp", "-lossless", "-quiet", tmpIn.Name(), "-o", tmpOutPath)
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
 		return nil, fmt.Errorf("webp conversion failed: %w (%s)", err, stderr.String())
