@@ -131,6 +131,7 @@ func main() {
 	dashboardRepo := repository.NewDashboardRepository(db.DB)
 	redirectRepo := repository.NewRedirectRepository(db.DB)
 	orderRepo := repository.NewOrderRepository(db.DB)
+	mediaMentionRepo := repository.NewMediaMentionRepository(db.DB)
 
 	// Initialize services
 	userService := service.NewUserService(userRepo)
@@ -149,6 +150,7 @@ func main() {
 	blogService := service.NewBlogService(blogRepo)
 	pressReleaseService := service.NewPressReleaseService(pressReleaseRepo)
 	redirectService := service.NewRedirectService(redirectRepo)
+	mediaMentionService := service.NewMediaMentionService(mediaMentionRepo, cloudflareService)
 	dashboardService := service.NewDashboardService(
 		dashboardRepo, reportRepo, blogRepo, pressReleaseRepo,
 		userRepo, formRepo, auditRepo,
@@ -170,6 +172,7 @@ func main() {
 	categoryHandler := handler.NewCategoryHandler(categoryService)
 	reportHandler := handler.NewReportHandler(reportService, authorRepo, auditService)
 	authorHandler := handler.NewAuthorHandler(authorService)
+	mediaMentionHandler := handler.NewMediaMentionHandler(mediaMentionService)
 	auditHandler := handler.NewAuditHandler(auditService)
 	roleHandler := handler.NewRoleHandler()
 	formHandler := handler.NewFormHandler(formService)
@@ -266,6 +269,15 @@ func main() {
 	v1.Delete("/authors/:id", middleware.RequireAuth(authService), middleware.RequireRole("admin"), authorHandler.Delete)
 	v1.Post("/authors/:id/image", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), authorHandler.UploadImage)
 	v1.Delete("/authors/:id/image", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), authorHandler.DeleteImage)
+
+	// Media Mention routes (public read, protected write)
+	v1.Get("/media-mentions", mediaMentionHandler.GetAll)
+	v1.Get("/media-mentions/:id", mediaMentionHandler.GetByID)
+	v1.Post("/media-mentions", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), mediaMentionHandler.Create)
+	v1.Put("/media-mentions/:id", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), mediaMentionHandler.Update)
+	v1.Delete("/media-mentions/:id", middleware.RequireAuth(authService), middleware.RequireRole("admin"), mediaMentionHandler.Delete)
+	v1.Post("/media-mentions/:id/image", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), mediaMentionHandler.UploadImage)
+	v1.Delete("/media-mentions/:id/image", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), mediaMentionHandler.DeleteImage)
 
 	// Audit log routes (admin only)
 	auditLogs := v1.Group("/audit-logs", middleware.RequireAuth(authService), middleware.RequireRole("admin"))
