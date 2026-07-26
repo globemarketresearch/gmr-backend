@@ -611,7 +611,7 @@
                 "summary": "Create author",
                 "parameters": [
                     {
-                        "description": "Author data (name is required with min 2 chars, role, bio, and linkedinUrl are optional. linkedinUrl must be a valid HTTPS URL)",
+                        "description": "Author data (name is required with min 2 chars, role, bio, linkedinUrl, and xUrl are optional. linkedinUrl and xUrl must be valid HTTPS URLs)",
                         "name": "author",
                         "in": "body",
                         "required": true,
@@ -819,7 +819,7 @@
                         "required": true
                     },
                     {
-                        "description": "Updated author data (all fields are optional for partial updates. linkedinUrl can be updated or cleared, must be a valid HTTPS URL if provided)",
+                        "description": "Updated author data (all fields are optional for partial updates. linkedinUrl and xUrl can be updated or cleared, must be a valid HTTPS URL if provided)",
                         "name": "author",
                         "in": "body",
                         "required": true,
@@ -1871,6 +1871,56 @@
                 }
             }
         },
+        "/api/v1/blogs/{id}/cancel-schedule": {
+            "patch": {
+                "description": "Cancel scheduled publishing for a blog",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Blogs"
+                ],
+                "summary": "Cancel scheduled publish",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Blog ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Schedule cancelled",
+                        "schema": {
+                            "$ref": "#/definitions/blog.BlogResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/blogs/{id}/publish": {
             "patch": {
                 "description": "Change blog status to published",
@@ -1902,6 +1952,255 @@
                     },
                     "400": {
                         "description": "Bad request - invalid ID or blog cannot be published",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Blog not found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/blogs/{id}/restore": {
+            "patch": {
+                "description": "Restore a soft deleted blog post by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Blogs"
+                ],
+                "summary": "Restore blog",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Blog ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Blog restored successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid ID",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Blog not found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/blogs/{id}/schedule": {
+            "patch": {
+                "description": "Schedule a blog to be published at a future date/time",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Blogs"
+                ],
+                "summary": "Schedule blog publish",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Blog ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Publish date",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Blog scheduled successfully",
+                        "schema": {
+                            "$ref": "#/definitions/blog.BlogResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Blog not found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/blogs/{id}/soft-delete": {
+            "patch": {
+                "description": "Soft delete a blog post by ID (moves to trash)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Blogs"
+                ],
+                "summary": "Soft delete blog",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Blog ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Blog moved to trash successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid ID",
                         "schema": {
                             "allOf": [
                                 {
@@ -2202,6 +2501,152 @@
                 }
             }
         },
+        "/api/v1/categories/{id}/image": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Upload or replace the feature image for a category. Requires admin or editor role.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Upload category image",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Category ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Image file (max 10MB, allowed types: JPEG, PNG, WebP)",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Category with updated image URL",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/category.Category"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid ID, missing file, or validation error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - authentication required",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - requires admin or editor role",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Category not found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/categories/{slug}": {
             "get": {
                 "description": "Get a single healthcare report category by its unique slug",
@@ -2282,6 +2727,130 @@
                 }
             }
         },
+        "/api/v1/categories/{slug}/blogs": {
+            "get": {
+                "description": "Get a paginated list of published blogs for a specific category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Blogs"
+                ],
+                "summary": "Get blogs by category slug",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category slug",
+                        "name": "slug",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 20, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of blogs with pagination",
+                        "schema": {
+                            "$ref": "#/definitions/blog.BlogListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/categories/{slug}/press-releases": {
+            "get": {
+                "description": "Get a paginated list of published press releases for a specific category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PressReleases"
+                ],
+                "summary": "Get press releases by category slug",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category slug",
+                        "name": "slug",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 20, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of press releases with pagination",
+                        "schema": {
+                            "$ref": "#/definitions/press_release.PressReleaseListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/categories/{slug}/reports": {
             "get": {
                 "description": "Get a paginated list of reports belonging to a specific category",
@@ -2343,6 +2912,166 @@
                     },
                     "400": {
                         "description": "Bad request - category slug is required",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/dashboard/activity": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Retrieves recent system activities from audit logs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get recent activity feed",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of activities to return (default: 10, max: 50)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Recent activities",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dashboard.ActivityResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - authentication required",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/dashboard/stats": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Retrieves comprehensive dashboard statistics including reports, blogs, press releases, users, and leads. User stats are only included for admin users.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Get dashboard statistics",
+                "responses": {
+                    "200": {
+                        "description": "Dashboard statistics",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dashboard.DashboardStats"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - authentication required",
                         "schema": {
                             "allOf": [
                                 {
@@ -3100,6 +3829,1505 @@
                 }
             }
         },
+        "/api/v1/media-mentions": {
+            "get": {
+                "description": "Get a paginated list of media mentions with optional search",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MediaMentions"
+                ],
+                "summary": "Get all media mentions",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1, min: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 20, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search in title",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of media mentions with pagination metadata",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/mediamention.MediaMention"
+                                            }
+                                        },
+                                        "meta": {
+                                            "$ref": "#/definitions/response.Meta"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new media mention. Requires admin or editor role.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MediaMentions"
+                ],
+                "summary": "Create media mention",
+                "parameters": [
+                    {
+                        "description": "Media mention data (title is required, link must be a valid URL if provided)",
+                        "name": "mediaMention",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mediamention.MediaMention"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/mediamention.MediaMention"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/media-mentions/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MediaMentions"
+                ],
+                "summary": "Get single media mention",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Media Mention ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/mediamention.MediaMention"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update an existing media mention by ID. Supports partial updates. Requires admin or editor role.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MediaMentions"
+                ],
+                "summary": "Update media mention",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Media Mention ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated media mention data",
+                        "name": "mediaMention",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/mediamention.MediaMention"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/mediamention.MediaMention"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a media mention by ID. Requires admin role.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MediaMentions"
+                ],
+                "summary": "Delete media mention",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Media Mention ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/media-mentions/{id}/image": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Upload or replace the logo image for a media mention. Requires admin or editor role.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MediaMentions"
+                ],
+                "summary": "Upload media mention logo image",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Media Mention ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Image file (max 10MB, allowed types: JPEG, PNG, WebP, GIF)",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/mediamention.MediaMention"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete the logo image of a media mention. Requires admin or editor role.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MediaMentions"
+                ],
+                "summary": "Delete media mention logo image",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Media Mention ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get paginated list of orders with optional filtering",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "List all orders",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by customer name/email/company/report",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start date (RFC3339)",
+                        "name": "dateFrom",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (RFC3339)",
+                        "name": "dateTo",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 20, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort field: createdAt, amount, status",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort order: asc, desc (default: desc)",
+                        "name": "sortOrder",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Orders list",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/order.Order"
+                                            }
+                                        },
+                                        "meta": {
+                                            "$ref": "#/definitions/response.Meta"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new order for a report and get a PayPal order ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Create an order",
+                "parameters": [
+                    {
+                        "description": "Order details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/order.CreateOrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Order created",
+                        "schema": {
+                            "$ref": "#/definitions/order.CreateOrderResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders/stats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get aggregate order statistics for the admin dashboard",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Get order statistics",
+                "responses": {
+                    "200": {
+                        "description": "Order statistics",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/order.OrderStats"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get a single order by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Get single order",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Order details",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/order.Order"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Order not found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders/{id}/capture": {
+            "post": {
+                "description": "Capture the PayPal payment for a pending order",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Capture payment for an order",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment captured",
+                        "schema": {
+                            "$ref": "#/definitions/order.CaptureOrderResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Order not found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders/{id}/status": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Admin endpoint to update order status and notes",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Update order status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Status update",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/order.UpdateStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Status updated",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Order not found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/orders/{id}/stripe-capture": {
+            "post": {
+                "description": "Verify the Stripe PaymentIntent succeeded and mark the order as paid",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Confirm Stripe payment for an order",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment confirmed",
+                        "schema": {
+                            "$ref": "#/definitions/order.ConfirmStripeOrderResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Order not found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/press-releases": {
             "get": {
                 "description": "Get a paginated list of press releases with optional filtering",
@@ -3605,6 +5833,56 @@
                 }
             }
         },
+        "/api/v1/press-releases/{id}/cancel-schedule": {
+            "patch": {
+                "description": "Cancel scheduled publishing for a press release",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Press Releases"
+                ],
+                "summary": "Cancel scheduled publish",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Press Release ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Schedule cancelled",
+                        "schema": {
+                            "$ref": "#/definitions/press_release.PressReleaseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/press-releases/{id}/publish": {
             "patch": {
                 "description": "Change press release status to published",
@@ -3636,6 +5914,255 @@
                     },
                     "400": {
                         "description": "Bad request - invalid ID or press release cannot be published",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Press release not found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/press-releases/{id}/restore": {
+            "patch": {
+                "description": "Restore a soft deleted press release by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PressReleases"
+                ],
+                "summary": "Restore press release",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Press release ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Press release restored successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid ID",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Press release not found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/press-releases/{id}/schedule": {
+            "patch": {
+                "description": "Schedule a press release to be published at a future date/time",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Press Releases"
+                ],
+                "summary": "Schedule press release publish",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Press Release ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Publish date",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Press release scheduled successfully",
+                        "schema": {
+                            "$ref": "#/definitions/press_release.PressReleaseResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Press release not found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/press-releases/{id}/soft-delete": {
+            "patch": {
+                "description": "Soft delete a press release by ID (moves to trash)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PressReleases"
+                ],
+                "summary": "Soft delete press release",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Press release ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Press release moved to trash successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid ID",
                         "schema": {
                             "allOf": [
                                 {
@@ -3863,6 +6390,552 @@
                 }
             }
         },
+        "/api/v1/redirects": {
+            "get": {
+                "description": "Get a paginated list of redirects with optional filtering",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Redirects"
+                ],
+                "summary": "Get all redirects",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search in source URL, destination URL, notes",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by enabled status: true, false",
+                        "name": "enabled",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 20, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of redirects with pagination",
+                        "schema": {
+                            "$ref": "#/definitions/redirect.RedirectListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new URL redirect rule",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Redirects"
+                ],
+                "summary": "Create redirect",
+                "parameters": [
+                    {
+                        "description": "Redirect data",
+                        "name": "redirect",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/redirect.CreateRedirectRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Redirect created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/redirect.RedirectResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/redirects/active": {
+            "get": {
+                "description": "Get all enabled redirect rules (public endpoint, used by middleware)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Redirects"
+                ],
+                "summary": "Get all active redirects",
+                "responses": {
+                    "200": {
+                        "description": "List of active redirects",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/redirects/bulk": {
+            "delete": {
+                "description": "Soft delete multiple redirect rules by IDs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Redirects"
+                ],
+                "summary": "Bulk delete redirects",
+                "parameters": [
+                    {
+                        "description": "Array of redirect IDs to delete",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/redirect.BulkDeleteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Redirects deleted successfully",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/redirects/hit/{id}": {
+            "post": {
+                "description": "Atomically increment the hit count for a redirect (called by public middleware)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Redirects"
+                ],
+                "summary": "Increment redirect hit count",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Redirect ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Hit count incremented",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/redirects/{id}": {
+            "get": {
+                "description": "Get a single redirect rule by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Redirects"
+                ],
+                "summary": "Get redirect by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Redirect ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Redirect details",
+                        "schema": {
+                            "$ref": "#/definitions/redirect.RedirectResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing redirect rule",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Redirects"
+                ],
+                "summary": "Update redirect",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Redirect ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Redirect update data",
+                        "name": "redirect",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/redirect.UpdateRedirectRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Redirect updated successfully",
+                        "schema": {
+                            "$ref": "#/definitions/redirect.RedirectResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Soft delete a redirect rule by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Redirects"
+                ],
+                "summary": "Delete redirect",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Redirect ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Redirect deleted successfully"
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/redirects/{id}/toggle": {
+            "patch": {
+                "description": "Toggle the enabled/disabled state of a redirect",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Redirects"
+                ],
+                "summary": "Toggle redirect enabled status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Redirect ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Redirect toggled successfully",
+                        "schema": {
+                            "$ref": "#/definitions/redirect.RedirectResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/reports": {
             "get": {
                 "description": "Get a paginated list of healthcare market research reports with optional filters for status, category, geography, and search. Admin users can use additional filters for user tracking and date ranges. Admin-only fields are automatically included in responses for authenticated admin/editor users.",
@@ -3911,6 +6984,12 @@
                         "type": "string",
                         "description": "Search in title, summary, and description",
                         "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Admin only: Show deleted reports (true/false, default: false)",
+                        "name": "deleted",
                         "in": "query"
                     },
                     {
@@ -4124,6 +7203,80 @@
                                     }
                                 }
                             ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/reports/author/{id}": {
+            "get": {
+                "description": "Get a paginated list of reports that include the specified author",
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Get reports by author ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Author ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 20, max: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/report.Report"
+                                            }
+                                        },
+                                        "meta": {
+                                            "$ref": "#/definitions/response.Meta"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid author ID",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Author not found",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -4689,7 +7842,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Delete a healthcare market research report by ID. Permanently removes the report and all associated data. Requires admin role.",
+                "description": "Permanently delete a healthcare market research report by ID. This action cannot be undone. The report and all associated data (images, versions, charts) will be permanently removed. Requires admin role.",
                 "consumes": [
                     "application/json"
                 ],
@@ -4699,7 +7852,7 @@
                 "tags": [
                     "Reports"
                 ],
-                "summary": "Delete a report",
+                "summary": "Hard delete a report (permanent)",
                 "parameters": [
                     {
                         "type": "integer",
@@ -4711,7 +7864,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Report deleted successfully",
+                        "description": "Report permanently deleted successfully",
                         "schema": {
                             "allOf": [
                                 {
@@ -4769,6 +7922,417 @@
                     },
                     "403": {
                         "description": "Forbidden - requires admin role",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Report not found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/reports/{id}/cancel-schedule": {
+            "patch": {
+                "description": "Cancel scheduled publishing for a report",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Cancel scheduled publish",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Report ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Schedule cancelled",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/reports/{id}/restore": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Restore a previously soft-deleted report. Requires admin role.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Restore a soft-deleted report",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Report ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Report restored successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid ID",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - requires admin role",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Report not found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/reports/{id}/schedule": {
+            "patch": {
+                "description": "Schedule a report to be published at a future date/time",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Schedule report publish",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Report ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Publish date",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Report scheduled successfully",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Report not found",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/reports/{id}/soft-delete": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Soft delete a report by marking it as deleted. The report can be restored later. Requires admin or editor role.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Soft delete a report",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Report ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Report soft deleted successfully",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid ID",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - requires admin or editor role",
                         "schema": {
                             "allOf": [
                                 {
@@ -5381,6 +8945,171 @@
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sitemap/blogs": {
+            "get": {
+                "description": "Returns paginated slugs and dates for published blogs (up to 1000 per page). Intended for sitemap generation only.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Blogs"
+                ],
+                "summary": "Get published blog slugs for sitemap generation",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 1000, max: 1000)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sitemap data",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sitemap/press-releases": {
+            "get": {
+                "description": "Returns paginated slugs and dates for published press releases (up to 1000 per page). Intended for sitemap generation only.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "PressReleases"
+                ],
+                "summary": "Get published press release slugs for sitemap generation",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 1000, max: 1000)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sitemap data",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "error": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sitemap/reports": {
+            "get": {
+                "description": "Returns paginated slugs and dates for published reports (up to 1000 per page). Intended for sitemap generation only.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Reports"
+                ],
+                "summary": "Get published report slugs for sitemap generation",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Items per page (default: 1000, max: 1000)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sitemap data",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
                         }
                     },
                     "500": {
@@ -6262,14 +9991,23 @@
                 },
                 "updatedAt": {
                     "type": "string"
+                },
+                "xUrl": {
+                    "type": "string"
                 }
             }
         },
         "blog.Blog": {
             "type": "object",
             "properties": {
+                "author": {
+                    "$ref": "#/definitions/author.Author"
+                },
                 "authorId": {
                     "type": "integer"
+                },
+                "category": {
+                    "$ref": "#/definitions/category.Category"
                 },
                 "categoryId": {
                     "type": "integer"
@@ -6280,11 +10018,20 @@
                 "createdAt": {
                     "type": "string"
                 },
+                "deletedAt": {
+                    "type": "string"
+                },
                 "excerpt": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
+                },
+                "internalLinks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/blog.InternalLinkEntry"
+                    }
                 },
                 "location": {
                     "type": "string"
@@ -6300,6 +10047,9 @@
                 },
                 "reviewedBy": {
                     "type": "integer"
+                },
+                "scheduledPublishEnabled": {
+                    "type": "boolean"
                 },
                 "slug": {
                     "type": "string"
@@ -6437,6 +10187,30 @@
                 }
             }
         },
+        "blog.InternalLinkEntry": {
+            "type": "object",
+            "properties": {
+                "keyword": {
+                    "type": "string"
+                },
+                "linkedCount": {
+                    "type": "integer"
+                },
+                "targetId": {
+                    "type": "integer"
+                },
+                "targetTitle": {
+                    "type": "string"
+                },
+                "targetType": {
+                    "description": "\"report\", \"blog\", \"press-release\"",
+                    "type": "string"
+                },
+                "targetUrl": {
+                    "type": "string"
+                }
+            }
+        },
         "blog.UpdateBlogRequest": {
             "type": "object",
             "properties": {
@@ -6455,6 +10229,12 @@
                     "maxLength": 500,
                     "minLength": 50
                 },
+                "internalLinks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/blog.InternalLinkEntry"
+                    }
+                },
                 "location": {
                     "type": "string"
                 },
@@ -6463,6 +10243,11 @@
                 },
                 "publishDate": {
                     "type": "string"
+                },
+                "slug": {
+                    "type": "string",
+                    "maxLength": 250,
+                    "minLength": 1
                 },
                 "status": {
                     "enum": [
@@ -6512,6 +10297,283 @@
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "dashboard.Activity": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "entityId": {
+                    "type": "integer"
+                },
+                "entityType": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "description": "ActivityType as string",
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/dashboard.UserInfo"
+                }
+            }
+        },
+        "dashboard.ActivityResponse": {
+            "type": "object",
+            "properties": {
+                "activities": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.Activity"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dashboard.BlogStats": {
+            "type": "object",
+            "properties": {
+                "change": {
+                    "type": "number"
+                },
+                "draft": {
+                    "type": "integer"
+                },
+                "published": {
+                    "type": "integer"
+                },
+                "review": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dashboard.ContentCreationStats": {
+            "type": "object",
+            "properties": {
+                "blogsThisMonth": {
+                    "type": "integer"
+                },
+                "pressReleasesThisMonth": {
+                    "type": "integer"
+                },
+                "reportsThisMonth": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dashboard.DashboardStats": {
+            "type": "object",
+            "properties": {
+                "blogs": {
+                    "$ref": "#/definitions/dashboard.BlogStats"
+                },
+                "contentCreation": {
+                    "$ref": "#/definitions/dashboard.ContentCreationStats"
+                },
+                "leads": {
+                    "$ref": "#/definitions/dashboard.LeadStats"
+                },
+                "performance": {
+                    "$ref": "#/definitions/dashboard.PerformanceStats"
+                },
+                "pressReleases": {
+                    "$ref": "#/definitions/dashboard.PressReleaseStats"
+                },
+                "reports": {
+                    "$ref": "#/definitions/dashboard.ReportStats"
+                },
+                "users": {
+                    "description": "Only for admins",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dashboard.UserStats"
+                        }
+                    ]
+                }
+            }
+        },
+        "dashboard.LeadStats": {
+            "type": "object",
+            "properties": {
+                "byCategory": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                },
+                "pending": {
+                    "type": "integer"
+                },
+                "processed": {
+                    "type": "integer"
+                },
+                "recent": {
+                    "$ref": "#/definitions/dashboard.RecentLeadStats"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dashboard.PerformanceStats": {
+            "type": "object",
+            "properties": {
+                "topCategories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.TopCategory"
+                    }
+                },
+                "topReports": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.TopReport"
+                    }
+                }
+            }
+        },
+        "dashboard.PressReleaseStats": {
+            "type": "object",
+            "properties": {
+                "change": {
+                    "type": "number"
+                },
+                "draft": {
+                    "type": "integer"
+                },
+                "published": {
+                    "type": "integer"
+                },
+                "review": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dashboard.RecentLeadStats": {
+            "type": "object",
+            "properties": {
+                "thisMonth": {
+                    "type": "integer"
+                },
+                "thisWeek": {
+                    "type": "integer"
+                },
+                "today": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dashboard.ReportStats": {
+            "type": "object",
+            "properties": {
+                "archived": {
+                    "type": "integer"
+                },
+                "change": {
+                    "description": "Percentage change from previous period",
+                    "type": "number"
+                },
+                "draft": {
+                    "type": "integer"
+                },
+                "published": {
+                    "type": "integer"
+                },
+                "topPerformers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dashboard.TopReport"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dashboard.TopCategory": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "reportCount": {
+                    "type": "integer"
+                },
+                "slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "dashboard.TopReport": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "dashboard.UserInfo": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dashboard.UserStats": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "integer"
+                },
+                "byRole": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                },
+                "change": {
+                    "type": "number"
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },
@@ -6567,11 +10629,19 @@
             "type": "string",
             "enum": [
                 "contact",
-                "request-sample"
+                "request-sample",
+                "request-customization",
+                "schedule-demo",
+                "newsletter",
+                "publish-news"
             ],
             "x-enum-varnames": [
                 "CategoryContact",
-                "CategoryRequestSample"
+                "CategoryRequestSample",
+                "CategoryRequestCustomization",
+                "CategoryScheduleDemo",
+                "CategoryNewsletter",
+                "CategoryPublishNews"
             ]
         },
         "form.FormData": {
@@ -6645,6 +10715,9 @@
                 "ipAddress": {
                     "type": "string"
                 },
+                "pageURL": {
+                    "type": "string"
+                },
                 "referrer": {
                     "type": "string"
                 },
@@ -6716,6 +10789,248 @@
                 }
             }
         },
+        "mediamention.MediaMention": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "displayOrder": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "imageUrl": {
+                    "type": "string"
+                },
+                "link": {
+                    "type": "string"
+                },
+                "reportId": {
+                    "type": "integer"
+                },
+                "reportLinkText": {
+                    "type": "string"
+                },
+                "reportSlug": {
+                    "type": "string"
+                },
+                "reportTitle": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "order.CaptureOrderResponse": {
+            "type": "object",
+            "properties": {
+                "order_id": {
+                    "type": "integer"
+                },
+                "paypal_capture_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/order.OrderStatus"
+                }
+            }
+        },
+        "order.ConfirmStripeOrderResponse": {
+            "type": "object",
+            "properties": {
+                "order_id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/order.OrderStatus"
+                },
+                "stripe_payment_intent_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "order.CreateOrderRequest": {
+            "type": "object",
+            "required": [
+                "customer_email",
+                "customer_name",
+                "report_slug"
+            ],
+            "properties": {
+                "customer_company": {
+                    "type": "string"
+                },
+                "customer_country": {
+                    "type": "string"
+                },
+                "customer_email": {
+                    "type": "string"
+                },
+                "customer_name": {
+                    "type": "string"
+                },
+                "customer_phone": {
+                    "type": "string"
+                },
+                "payment_method": {
+                    "description": "PaymentMethod selects the payment gateway: \"paypal\" (default) or \"stripe\".",
+                    "type": "string"
+                },
+                "report_slug": {
+                    "type": "string"
+                }
+            }
+        },
+        "order.CreateOrderResponse": {
+            "type": "object",
+            "properties": {
+                "order_id": {
+                    "type": "integer"
+                },
+                "payment_method": {
+                    "type": "string"
+                },
+                "paypal_order_id": {
+                    "type": "string"
+                },
+                "stripe_client_secret": {
+                    "type": "string"
+                }
+            }
+        },
+        "order.Order": {
+            "type": "object",
+            "properties": {
+                "admin_notes": {
+                    "type": "string"
+                },
+                "amount": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "customer_company": {
+                    "type": "string"
+                },
+                "customer_country": {
+                    "type": "string"
+                },
+                "customer_email": {
+                    "type": "string"
+                },
+                "customer_name": {
+                    "type": "string"
+                },
+                "customer_phone": {
+                    "type": "string"
+                },
+                "fulfilled_at": {
+                    "type": "string"
+                },
+                "fulfilled_by": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "payment_method": {
+                    "type": "string"
+                },
+                "paypal_capture_id": {
+                    "type": "string"
+                },
+                "paypal_order_id": {
+                    "type": "string"
+                },
+                "report_id": {
+                    "type": "integer"
+                },
+                "report_slug": {
+                    "type": "string"
+                },
+                "report_title": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/order.OrderStatus"
+                },
+                "stripe_payment_intent_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "order.OrderStats": {
+            "type": "object",
+            "properties": {
+                "by_status": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                },
+                "recent_count": {
+                    "description": "last 30 days",
+                    "type": "integer"
+                },
+                "recent_revenue": {
+                    "description": "last 30 days",
+                    "type": "number"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "total_revenue": {
+                    "type": "number"
+                }
+            }
+        },
+        "order.OrderStatus": {
+            "type": "string",
+            "enum": [
+                "pending_payment",
+                "payment_received",
+                "processing",
+                "delivered",
+                "cancelled",
+                "refunded"
+            ],
+            "x-enum-varnames": [
+                "StatusPendingPayment",
+                "StatusPaymentReceived",
+                "StatusProcessing",
+                "StatusDelivered",
+                "StatusCancelled",
+                "StatusRefunded"
+            ]
+        },
+        "order.UpdateStatusRequest": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "admin_notes": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/order.OrderStatus"
+                }
+            }
+        },
         "press_release.CreatePressReleaseRequest": {
             "type": "object",
             "required": [
@@ -6752,6 +11067,9 @@
                 "publishDate": {
                     "type": "string"
                 },
+                "reportUrl": {
+                    "type": "string"
+                },
                 "status": {
                     "enum": [
                         "draft",
@@ -6774,11 +11092,41 @@
                 }
             }
         },
+        "press_release.InternalLinkEntry": {
+            "type": "object",
+            "properties": {
+                "keyword": {
+                    "type": "string"
+                },
+                "linkedCount": {
+                    "type": "integer"
+                },
+                "targetId": {
+                    "type": "integer"
+                },
+                "targetTitle": {
+                    "type": "string"
+                },
+                "targetType": {
+                    "description": "\"report\", \"blog\", \"press-release\"",
+                    "type": "string"
+                },
+                "targetUrl": {
+                    "type": "string"
+                }
+            }
+        },
         "press_release.PressRelease": {
             "type": "object",
             "properties": {
+                "author": {
+                    "$ref": "#/definitions/author.Author"
+                },
                 "authorId": {
                     "type": "integer"
+                },
+                "category": {
+                    "$ref": "#/definitions/category.Category"
                 },
                 "categoryId": {
                     "type": "integer"
@@ -6789,11 +11137,20 @@
                 "createdAt": {
                     "type": "string"
                 },
+                "deletedAt": {
+                    "type": "string"
+                },
                 "excerpt": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
+                },
+                "internalLinks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/press_release.InternalLinkEntry"
+                    }
                 },
                 "location": {
                     "type": "string"
@@ -6804,11 +11161,17 @@
                 "publishDate": {
                     "type": "string"
                 },
+                "reportUrl": {
+                    "type": "string"
+                },
                 "reviewedAt": {
                     "type": "string"
                 },
                 "reviewedBy": {
                     "type": "integer"
+                },
+                "scheduledPublishEnabled": {
+                    "type": "boolean"
                 },
                 "slug": {
                     "type": "string"
@@ -6906,6 +11269,12 @@
                     "maxLength": 500,
                     "minLength": 50
                 },
+                "internalLinks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/press_release.InternalLinkEntry"
+                    }
+                },
                 "location": {
                     "type": "string"
                 },
@@ -6914,6 +11283,14 @@
                 },
                 "publishDate": {
                     "type": "string"
+                },
+                "reportUrl": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string",
+                    "maxLength": 250,
+                    "minLength": 1
                 },
                 "status": {
                     "enum": [
@@ -6934,6 +11311,120 @@
                     "type": "string",
                     "maxLength": 200,
                     "minLength": 10
+                }
+            }
+        },
+        "redirect.BulkDeleteRequest": {
+            "type": "object",
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "redirect.CreateRedirectRequest": {
+            "type": "object",
+            "properties": {
+                "destinationUrl": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "redirectType": {
+                    "type": "integer"
+                },
+                "sourceUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "redirect.Redirect": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "destinationUrl": {
+                    "type": "string"
+                },
+                "hitCount": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isEnabled": {
+                    "type": "boolean"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "redirectType": {
+                    "type": "integer"
+                },
+                "sourceUrl": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "redirect.RedirectListResponse": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "redirects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/redirect.Redirect"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "redirect.RedirectResponse": {
+            "type": "object",
+            "properties": {
+                "redirect": {
+                    "$ref": "#/definitions/redirect.Redirect"
+                }
+            }
+        },
+        "redirect.UpdateRedirectRequest": {
+            "type": "object",
+            "properties": {
+                "destinationUrl": {
+                    "type": "string"
+                },
+                "isEnabled": {
+                    "type": "boolean"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "redirectType": {
+                    "type": "integer"
+                },
+                "sourceUrl": {
+                    "type": "string"
                 }
             }
         },
@@ -6983,6 +11474,30 @@
                     "type": "string"
                 },
                 "question": {
+                    "type": "string"
+                }
+            }
+        },
+        "report.InternalLinkEntry": {
+            "type": "object",
+            "properties": {
+                "keyword": {
+                    "type": "string"
+                },
+                "linkedCount": {
+                    "type": "integer"
+                },
+                "targetId": {
+                    "type": "integer"
+                },
+                "targetTitle": {
+                    "type": "string"
+                },
+                "targetType": {
+                    "description": "\"report\", \"blog\", \"press-release\"",
+                    "type": "string"
+                },
+                "targetUrl": {
                     "type": "string"
                 }
             }
@@ -7043,6 +11558,9 @@
                 "category_id": {
                     "type": "integer"
                 },
+                "category_image_url": {
+                    "type": "string"
+                },
                 "category_name": {
                     "type": "string"
                 },
@@ -7057,14 +11575,14 @@
                 "currency": {
                     "type": "string"
                 },
+                "deleted_at": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
                 "discounted_price": {
                     "type": "number"
-                },
-                "download_count": {
-                    "type": "integer"
                 },
                 "faqs": {
                     "description": "FAQs",
@@ -7087,6 +11605,13 @@
                 },
                 "id": {
                     "type": "integer"
+                },
+                "internal_links": {
+                    "description": "Internal links configuration",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/report.InternalLinkEntry"
+                    }
                 },
                 "internal_notes": {
                     "type": "string"
@@ -7130,6 +11655,9 @@
                     "description": "Publishing",
                     "type": "string"
                 },
+                "scheduled_publish_enabled": {
+                    "type": "boolean"
+                },
                 "sections": {
                     "description": "Content sections",
                     "allOf": [
@@ -7148,9 +11676,6 @@
                 "summary": {
                     "type": "string"
                 },
-                "thumbnail_url": {
-                    "type": "string"
-                },
                 "title": {
                     "type": "string"
                 },
@@ -7158,10 +11683,6 @@
                     "type": "string"
                 },
                 "updated_by": {
-                    "type": "integer"
-                },
-                "view_count": {
-                    "description": "Statistics",
                     "type": "integer"
                 }
             }
@@ -7277,9 +11798,6 @@
         "report.ReportWithRelations": {
             "type": "object",
             "properties": {
-                "author": {
-                    "$ref": "#/definitions/report.UserReference"
-                },
                 "author_ids": {
                     "description": "Authors (JSON array of user IDs)",
                     "type": "array",
@@ -7287,8 +11805,17 @@
                         "type": "integer"
                     }
                 },
+                "authors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/author.Author"
+                    }
+                },
                 "category_id": {
                     "type": "integer"
+                },
+                "category_image_url": {
+                    "type": "string"
                 },
                 "category_name": {
                     "type": "string"
@@ -7310,14 +11837,14 @@
                 "currency": {
                     "type": "string"
                 },
+                "deleted_at": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
                 "discounted_price": {
                     "type": "number"
-                },
-                "download_count": {
-                    "type": "integer"
                 },
                 "faqs": {
                     "description": "FAQs",
@@ -7340,6 +11867,13 @@
                 },
                 "id": {
                     "type": "integer"
+                },
+                "internal_links": {
+                    "description": "Internal links configuration",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/report.InternalLinkEntry"
+                    }
                 },
                 "internal_notes": {
                     "type": "string"
@@ -7383,6 +11917,9 @@
                     "description": "Publishing",
                     "type": "string"
                 },
+                "scheduled_publish_enabled": {
+                    "type": "boolean"
+                },
                 "sections": {
                     "description": "Content sections",
                     "allOf": [
@@ -7401,9 +11938,6 @@
                 "summary": {
                     "type": "string"
                 },
-                "thumbnail_url": {
-                    "type": "string"
-                },
                 "title": {
                     "type": "string"
                 },
@@ -7418,24 +11952,6 @@
                     "items": {
                         "$ref": "#/definitions/report.ReportVersion"
                     }
-                },
-                "view_count": {
-                    "description": "Statistics",
-                    "type": "integer"
-                }
-            }
-        },
-        "report.UserReference": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
                 }
             }
         },
