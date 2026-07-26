@@ -12,6 +12,7 @@ type Author struct {
 	Bio         string    `json:"bio,omitempty" gorm:"type:text"`
 	ImageURL    string    `json:"imageUrl,omitempty" gorm:"type:varchar(500)"`
 	LinkedinURL string    `json:"linkedinUrl,omitempty" gorm:"type:varchar(500)"`
+	XURL        string    `json:"xUrl,omitempty" gorm:"type:varchar(500)"`
 	CreatedAt   time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
