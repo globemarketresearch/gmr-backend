@@ -40,3 +40,6 @@ Thumbs.db
 bin/
 dist/
 build/
+
+# Superpowers SDD scratch workspace
+.superpowers/
