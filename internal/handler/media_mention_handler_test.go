@@ -3,12 +3,10 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"io"
 	"mime/multipart"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/healthcare-market-research/backend/internal/domain/mediamention"
@@ -207,5 +205,36 @@ func TestMediaMentionHandler_Update_UnlinksReportWhenExplicitlyNulled(t *testing
 	}
 }
 
-var _ = time.Now
-var _ = errors.New
+func TestMediaMentionHandler_Update_UnrelatedFieldEdit_SucceedsEvenWhenLinkedReportNowUnpublished(t *testing.T) {
+	existing := &mediamention.MediaMention{
+		ID: 1, Title: "Forbes",
+		ReportID:       func() *uint { id := uint(1); return &id }(),
+		ReportLinkText: "Old Caption",
+	}
+	mockService := &mockMediaMentionService{
+		getByIDFunc: func(id uint) (*mediamention.MediaMention, error) { return existing, nil },
+		updateFunc:  func(id uint, mention *mediamention.MediaMention) error { return nil },
+	}
+	// Report is now unpublished — if validation ran unconditionally, this would 400.
+	mockReports := &mockReportLookup{
+		getByIDFunc: func(id uint) (*report.Report, error) {
+			return &report.Report{ID: id, Status: "draft"}, nil
+		},
+	}
+	h := NewMediaMentionHandler(mockService, mockReports)
+
+	app := fiber.New()
+	app.Put("/media-mentions/:id", h.Update)
+
+	body, _ := json.Marshal(map[string]interface{}{"displayOrder": 5})
+	req := httptest.NewRequest("PUT", "/media-mentions/1", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := app.Test(req)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
+	if resp.StatusCode != fiber.StatusOK {
+		t.Errorf("expected 200 (unrelated edit should succeed despite stale report link), got %d", resp.StatusCode)
+	}
+}

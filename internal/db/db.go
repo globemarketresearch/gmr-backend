@@ -131,6 +131,28 @@ func Migrate() error {
 		`)
 	}
 
+	// Add foreign key constraint for media_mentions.report_id (GORM doesn't auto-create this)
+	// Check if constraint already exists before adding
+	var mediaMentionReportFKExists bool
+	DB.Raw(`
+		SELECT EXISTS (
+			SELECT 1 FROM information_schema.table_constraints
+			WHERE constraint_name = 'fk_media_mentions_report'
+			AND table_name = 'media_mentions'
+			AND table_schema = CURRENT_SCHEMA()
+		)
+	`).Scan(&mediaMentionReportFKExists)
+
+	if !mediaMentionReportFKExists {
+		DB.Exec(`
+			ALTER TABLE media_mentions
+			ADD CONSTRAINT fk_media_mentions_report
+			FOREIGN KEY (report_id)
+			REFERENCES reports(id)
+			ON DELETE SET NULL
+		`)
+	}
+
 	log.Println("Database migrations completed successfully")
 	return nil
 }

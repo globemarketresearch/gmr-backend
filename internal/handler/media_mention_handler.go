@@ -212,16 +212,19 @@ func (h *MediaMentionHandler) Update(c *fiber.Ctx) error {
 		if _, ok := bodyMap["displayOrder"]; ok {
 			existing.DisplayOrder = req.DisplayOrder
 		}
-		if _, ok := bodyMap["reportId"]; ok {
+		_, reportIDTouched := bodyMap["reportId"]
+		_, reportLinkTextTouched := bodyMap["reportLinkText"]
+		if reportIDTouched {
 			existing.ReportID = req.ReportID
 		}
-		if _, ok := bodyMap["reportLinkText"]; ok {
+		if reportLinkTextTouched {
 			existing.ReportLinkText = req.ReportLinkText
 		}
-	}
-
-	if err := h.validateReportReference(existing.ReportID, existing.ReportLinkText); err != nil {
-		return response.BadRequest(c, err.Error())
+		if reportIDTouched || reportLinkTextTouched {
+			if err := h.validateReportReference(existing.ReportID, existing.ReportLinkText); err != nil {
+				return response.BadRequest(c, err.Error())
+			}
+		}
 	}
 
 	if err := h.service.Update(uint(id), existing); err != nil {
