@@ -21,36 +21,49 @@ func NewMediaMentionRepository(db *gorm.DB) MediaMentionRepository {
 	return &mediaMentionRepository{db: db}
 }
 
+const mediaMentionReportJoinSQL = `
+	SELECT m.*, r.slug as report_slug, r.title as report_title
+	FROM media_mentions m
+	LEFT JOIN reports r ON m.report_id = r.id AND r.status = 'published' AND r.deleted_at IS NULL
+`
+
 func (r *mediaMentionRepository) GetAll(page, limit int, search string) ([]mediamention.MediaMention, int64, error) {
 	var mentions []mediamention.MediaMention
 	var total int64
 
 	offset := (page - 1) * limit
 
-	query := r.db.Model(&mediamention.MediaMention{})
-
+	countQuery := r.db.Model(&mediamention.MediaMention{})
 	if search != "" {
-		searchPattern := "%" + search + "%"
-		query = query.Where("title ILIKE ?", searchPattern)
+		countQuery = countQuery.Where("title ILIKE ?", "%"+search+"%")
 	}
-
-	if err := query.Count(&total).Error; err != nil {
+	if err := countQuery.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	err := query.Order("display_order ASC, created_at DESC").
-		Limit(limit).
-		Offset(offset).
-		Find(&mentions).Error
+	querySQL := mediaMentionReportJoinSQL
+	args := []interface{}{}
+	if search != "" {
+		querySQL += " WHERE m.title ILIKE ?"
+		args = append(args, "%"+search+"%")
+	}
+	querySQL += " ORDER BY m.display_order ASC, m.created_at DESC LIMIT ? OFFSET ?"
+	args = append(args, limit, offset)
 
+	err := r.db.Raw(querySQL, args...).Scan(&mentions).Error
 	return mentions, total, err
 }
 
 func (r *mediaMentionRepository) GetByID(id uint) (*mediamention.MediaMention, error) {
 	var mention mediamention.MediaMention
-	err := r.db.First(&mention, id).Error
+	querySQL := mediaMentionReportJoinSQL + " WHERE m.id = ?"
+
+	err := r.db.Raw(querySQL, id).Scan(&mention).Error
 	if err != nil {
 		return nil, err
+	}
+	if mention.ID == 0 {
+		return nil, gorm.ErrRecordNotFound
 	}
 	return &mention, nil
 }
