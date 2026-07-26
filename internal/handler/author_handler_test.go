@@ -701,3 +701,147 @@ func TestAuthorHandler_Update_InvalidLinkedInURL(t *testing.T) {
 		t.Error("Expected success to be false")
 	}
 }
+
+// Tests for X URL validation in Create handler
+func TestAuthorHandler_Create_WithValidXURL(t *testing.T) {
+	mockService := &mockAuthorService{
+		createFunc: func(a *author.Author) error {
+			if a.XURL != "https://x.com/johndoe" {
+				t.Errorf("Expected XURL to be set correctly, got %s", a.XURL)
+			}
+			return nil
+		},
+	}
+
+	handler := NewAuthorHandler(mockService)
+	app := fiber.New()
+	app.Post("/authors", handler.Create)
+
+	reqBody := map[string]interface{}{
+		"name": "John Doe",
+		"xUrl": "https://x.com/johndoe",
+	}
+	bodyBytes, _ := json.Marshal(reqBody)
+
+	req := httptest.NewRequest("POST", "/authors", bytes.NewReader(bodyBytes))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := app.Test(req)
+	if err != nil {
+		t.Fatalf("Failed to perform request: %v", err)
+	}
+
+	if resp.StatusCode != fiber.StatusCreated {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		t.Errorf("Expected status 201, got %d. Body: %s", resp.StatusCode, string(bodyBytes))
+	}
+}
+
+func TestAuthorHandler_Create_WithInvalidXURL(t *testing.T) {
+	mockService := &mockAuthorService{}
+	handler := NewAuthorHandler(mockService)
+	app := fiber.New()
+	app.Post("/authors", handler.Create)
+
+	reqBody := map[string]interface{}{
+		"name": "John Doe",
+		"xUrl": "not-a-url",
+	}
+	bodyBytes, _ := json.Marshal(reqBody)
+
+	req := httptest.NewRequest("POST", "/authors", bytes.NewReader(bodyBytes))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := app.Test(req)
+	if err != nil {
+		t.Fatalf("Failed to perform request: %v", err)
+	}
+
+	if resp.StatusCode != fiber.StatusBadRequest {
+		t.Errorf("Expected status 400, got %d", resp.StatusCode)
+	}
+}
+
+// Tests for X URL validation in Update handler
+func TestAuthorHandler_Update_XURL(t *testing.T) {
+	existingAuthor := &author.Author{
+		ID:   1,
+		Name: "John Doe",
+	}
+
+	mockService := &mockAuthorService{
+		getByIDFunc: func(id uint) (*author.Author, error) {
+			return existingAuthor, nil
+		},
+		updateFunc: func(id uint, a *author.Author) error {
+			if a.XURL != "https://x.com/updated" {
+				t.Errorf("Expected XURL to be updated, got %s", a.XURL)
+			}
+			return nil
+		},
+	}
+
+	handler := NewAuthorHandler(mockService)
+	app := fiber.New()
+	app.Put("/authors/:id", handler.Update)
+
+	reqBody := map[string]interface{}{
+		"xUrl": "https://x.com/updated",
+	}
+	bodyBytes, _ := json.Marshal(reqBody)
+
+	req := httptest.NewRequest("PUT", "/authors/1", bytes.NewReader(bodyBytes))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := app.Test(req)
+	if err != nil {
+		t.Fatalf("Failed to perform request: %v", err)
+	}
+
+	if resp.StatusCode != fiber.StatusOK {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		t.Errorf("Expected status 200, got %d. Body: %s", resp.StatusCode, string(bodyBytes))
+	}
+}
+
+func TestAuthorHandler_Update_ClearXURL(t *testing.T) {
+	existingAuthor := &author.Author{
+		ID:   1,
+		Name: "John Doe",
+		XURL: "https://x.com/johndoe",
+	}
+
+	mockService := &mockAuthorService{
+		getByIDFunc: func(id uint) (*author.Author, error) {
+			return existingAuthor, nil
+		},
+		updateFunc: func(id uint, a *author.Author) error {
+			if a.XURL != "" {
+				t.Errorf("Expected XURL to be cleared, got %s", a.XURL)
+			}
+			return nil
+		},
+	}
+
+	handler := NewAuthorHandler(mockService)
+	app := fiber.New()
+	app.Put("/authors/:id", handler.Update)
+
+	reqBody := map[string]interface{}{
+		"xUrl": "",
+	}
+	bodyBytes, _ := json.Marshal(reqBody)
+
+	req := httptest.NewRequest("PUT", "/authors/1", bytes.NewReader(bodyBytes))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := app.Test(req)
+	if err != nil {
+		t.Fatalf("Failed to perform request: %v", err)
+	}
+
+	if resp.StatusCode != fiber.StatusOK {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		t.Errorf("Expected status 200, got %d. Body: %s", resp.StatusCode, string(bodyBytes))
+	}
+}

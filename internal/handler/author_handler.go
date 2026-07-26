@@ -92,7 +92,7 @@ func (h *AuthorHandler) GetByID(c *fiber.Ctx) error {
 // @Security BearerAuth
 // @Accept json
 // @Produce json
-// @Param author body author.Author true "Author data (name is required with min 2 chars, role, bio, and linkedinUrl are optional. linkedinUrl must be a valid HTTPS URL)"
+// @Param author body author.Author true "Author data (name is required with min 2 chars, role, bio, linkedinUrl, and xUrl are optional. linkedinUrl and xUrl must be valid HTTPS URLs)"
 // @Success 201 {object} response.Response{data=author.Author} "Created author"
 // @Failure 400 {object} response.Response{error=string} "Bad request - invalid input or validation error"
 // @Failure 401 {object} response.Response{error=string} "Unauthorized - authentication required"
@@ -125,6 +125,13 @@ func (h *AuthorHandler) Create(c *fiber.Ctx) error {
 		}
 	}
 
+	// Validate X URL if provided
+	if req.XURL != "" {
+		if err := validation.ValidateURL(req.XURL); err != nil {
+			return response.BadRequest(c, "Invalid X URL: "+err.Error())
+		}
+	}
+
 	if err := h.service.Create(&req); err != nil {
 		return response.InternalError(c, "Failed to create author")
 	}
@@ -143,7 +150,7 @@ func (h *AuthorHandler) Create(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param id path int true "Author ID"
-// @Param author body author.Author true "Updated author data (all fields are optional for partial updates. linkedinUrl can be updated or cleared, must be a valid HTTPS URL if provided)"
+// @Param author body author.Author true "Updated author data (all fields are optional for partial updates. linkedinUrl and xUrl can be updated or cleared, must be a valid HTTPS URL if provided)"
 // @Success 200 {object} response.Response{data=author.Author} "Updated author"
 // @Failure 400 {object} response.Response{error=string} "Bad request - invalid input or validation error"
 // @Failure 401 {object} response.Response{error=string} "Unauthorized - authentication required"
@@ -196,6 +203,14 @@ func (h *AuthorHandler) Update(c *fiber.Ctx) error {
 					}
 				}
 				existing.LinkedinURL = req.LinkedinURL
+			}
+			if _, ok := bodyMap["xUrl"]; ok {
+				if req.XURL != "" {
+					if err := validation.ValidateURL(req.XURL); err != nil {
+						return response.BadRequest(c, "Invalid X URL: "+err.Error())
+					}
+				}
+				existing.XURL = req.XURL
 			}
 		}
 	}
