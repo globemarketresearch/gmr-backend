@@ -172,7 +172,7 @@ func main() {
 	categoryHandler := handler.NewCategoryHandler(categoryService)
 	reportHandler := handler.NewReportHandler(reportService, authorRepo, auditService)
 	authorHandler := handler.NewAuthorHandler(authorService)
-	mediaMentionHandler := handler.NewMediaMentionHandler(mediaMentionService)
+	mediaMentionHandler := handler.NewMediaMentionHandler(mediaMentionService, reportRepo)
 	auditHandler := handler.NewAuditHandler(auditService)
 	roleHandler := handler.NewRoleHandler()
 	formHandler := handler.NewFormHandler(formService)

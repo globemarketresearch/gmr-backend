@@ -1,22 +1,51 @@
 package handler
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/healthcare-market-research/backend/internal/domain/mediamention"
+	"github.com/healthcare-market-research/backend/internal/domain/report"
 	"github.com/healthcare-market-research/backend/internal/service"
 	"github.com/healthcare-market-research/backend/pkg/response"
 	"github.com/healthcare-market-research/backend/pkg/validation"
 )
 
-type MediaMentionHandler struct {
-	service service.MediaMentionService
+// ReportLookup is the minimal capability MediaMentionHandler needs from
+// ReportRepository: looking up a report by ID to validate a reportId
+// reference before persisting it. Satisfied structurally by
+// repository.ReportRepository — no adapter needed at the call site.
+type ReportLookup interface {
+	GetByID(id uint) (*report.Report, error)
 }
 
-func NewMediaMentionHandler(service service.MediaMentionService) *MediaMentionHandler {
-	return &MediaMentionHandler{service: service}
+type MediaMentionHandler struct {
+	service      service.MediaMentionService
+	reportLookup ReportLookup
+}
+
+func NewMediaMentionHandler(service service.MediaMentionService, reportLookup ReportLookup) *MediaMentionHandler {
+	return &MediaMentionHandler{service: service, reportLookup: reportLookup}
+}
+
+// validateReportReference checks that reportID (if present) points at a
+// published, non-deleted report, and that reportID/reportLinkText are
+// either both set or both empty.
+func (h *MediaMentionHandler) validateReportReference(reportID *uint, reportLinkText string) error {
+	if reportID == nil && reportLinkText == "" {
+		return nil
+	}
+	if reportID == nil || reportLinkText == "" {
+		return fmt.Errorf("reportId and reportLinkText must be set together")
+	}
+
+	rep, err := h.reportLookup.GetByID(*reportID)
+	if err != nil || rep.Status != "published" || rep.DeletedAt != nil {
+		return fmt.Errorf("selected report not found or not published")
+	}
+	return nil
 }
 
 // GetAll godoc
@@ -117,6 +146,10 @@ func (h *MediaMentionHandler) Create(c *fiber.Ctx) error {
 		}
 	}
 
+	if err := h.validateReportReference(req.ReportID, req.ReportLinkText); err != nil {
+		return response.BadRequest(c, err.Error())
+	}
+
 	if err := h.service.Create(&req); err != nil {
 		return response.InternalError(c, "Failed to create media mention")
 	}
@@ -179,6 +212,16 @@ func (h *MediaMentionHandler) Update(c *fiber.Ctx) error {
 		if _, ok := bodyMap["displayOrder"]; ok {
 			existing.DisplayOrder = req.DisplayOrder
 		}
+		if _, ok := bodyMap["reportId"]; ok {
+			existing.ReportID = req.ReportID
+		}
+		if _, ok := bodyMap["reportLinkText"]; ok {
+			existing.ReportLinkText = req.ReportLinkText
+		}
+	}
+
+	if err := h.validateReportReference(existing.ReportID, existing.ReportLinkText); err != nil {
+		return response.BadRequest(c, err.Error())
 	}
 
 	if err := h.service.Update(uint(id), existing); err != nil {
