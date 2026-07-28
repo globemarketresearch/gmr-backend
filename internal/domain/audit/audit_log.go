@@ -48,6 +48,12 @@ const (
 	ActionPressReleaseUpdate  = "press_release.update"
 	ActionPressReleaseDelete  = "press_release.delete"
 	ActionPressReleasePublish = "press_release.publish"
+
+	// Industry News actions
+	ActionIndustryNewsCreate  = "industry_news.create"
+	ActionIndustryNewsUpdate  = "industry_news.update"
+	ActionIndustryNewsDelete  = "industry_news.delete"
+	ActionIndustryNewsPublish = "industry_news.publish"
 )
 
 // EntityType constants
@@ -58,6 +64,7 @@ const (
 	EntityAuthor       = "author"
 	EntityBlog         = "blog"
 	EntityPressRelease = "press_release"
+	EntityIndustryNews = "industry_news"
 )
 
 // Status constants

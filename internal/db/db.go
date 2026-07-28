@@ -11,6 +11,7 @@ import (
 	"github.com/healthcare-market-research/backend/internal/domain/blog"
 	"github.com/healthcare-market-research/backend/internal/domain/category"
 	"github.com/healthcare-market-research/backend/internal/domain/form"
+	"github.com/healthcare-market-research/backend/internal/domain/industry_news"
 	"github.com/healthcare-market-research/backend/internal/domain/mediamention"
 	"github.com/healthcare-market-research/backend/internal/domain/order"
 	"github.com/healthcare-market-research/backend/internal/domain/press_release"
@@ -96,6 +97,8 @@ func Migrate() error {
 		&form.FormSubmission{},
 		&blog.Blog{},
 		&press_release.PressRelease{},
+		&industry_news.IndustryNews{},
+		&industry_news.IndustryNewsImage{},
 		&redirect.Redirect{},
 		&order.Order{},
 		&mediamention.MediaMention{},
@@ -125,6 +128,27 @@ func Migrate() error {
 		DB.Exec(`
 			ALTER TABLE report_images
 			ADD CONSTRAINT fk_report_images_user
+			FOREIGN KEY (uploaded_by)
+			REFERENCES users(id)
+			ON DELETE SET NULL
+		`)
+	}
+
+	// Add foreign key constraint for industry_news_images.uploaded_by (GORM doesn't auto-create this)
+	var industryNewsImagesConstraintExists bool
+	DB.Raw(`
+		SELECT EXISTS (
+			SELECT 1 FROM information_schema.table_constraints
+			WHERE constraint_name = 'fk_industry_news_images_user'
+			AND table_name = 'industry_news_images'
+			AND table_schema = CURRENT_SCHEMA()
+		)
+	`).Scan(&industryNewsImagesConstraintExists)
+
+	if !industryNewsImagesConstraintExists {
+		DB.Exec(`
+			ALTER TABLE industry_news_images
+			ADD CONSTRAINT fk_industry_news_images_user
 			FOREIGN KEY (uploaded_by)
 			REFERENCES users(id)
 			ON DELETE SET NULL
