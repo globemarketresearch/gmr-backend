@@ -128,6 +128,8 @@ func main() {
 	reportImageRepo := repository.NewReportImageRepository(db.DB)
 	blogRepo := repository.NewBlogRepository(db.DB)
 	pressReleaseRepo := repository.NewPressReleaseRepository(db.DB)
+	industryNewsRepo := repository.NewIndustryNewsRepository(db.DB)
+	industryNewsImageRepo := repository.NewIndustryNewsImageRepository(db.DB)
 	dashboardRepo := repository.NewDashboardRepository(db.DB)
 	redirectRepo := repository.NewRedirectRepository(db.DB)
 	orderRepo := repository.NewOrderRepository(db.DB)
@@ -149,6 +151,8 @@ func main() {
 	reportImageService := service.NewReportImageService(reportImageRepo, reportRepo, cloudflareService)
 	blogService := service.NewBlogService(blogRepo)
 	pressReleaseService := service.NewPressReleaseService(pressReleaseRepo)
+	industryNewsService := service.NewIndustryNewsService(industryNewsRepo)
+	industryNewsImageService := service.NewIndustryNewsImageService(industryNewsImageRepo, industryNewsRepo, cloudflareService)
 	redirectService := service.NewRedirectService(redirectRepo)
 	mediaMentionService := service.NewMediaMentionService(mediaMentionRepo, cloudflareService)
 	dashboardService := service.NewDashboardService(
@@ -157,7 +161,7 @@ func main() {
 	)
 
 	// Initialize scheduler service
-	schedulerService := service.NewSchedulerService(reportRepo, blogRepo, pressReleaseRepo)
+	schedulerService := service.NewSchedulerService(reportRepo, blogRepo, pressReleaseRepo, industryNewsRepo)
 
 	// Start scheduler with context
 	ctx, cancel := context.WithCancel(context.Background())
@@ -179,6 +183,8 @@ func main() {
 	reportImageHandler := handler.NewReportImageHandler(reportImageService)
 	blogHandler := handler.NewBlogHandler(blogService, auditService)
 	pressReleaseHandler := handler.NewPressReleaseHandler(pressReleaseService, auditService)
+	industryNewsHandler := handler.NewIndustryNewsHandler(industryNewsService, auditService)
+	industryNewsImageHandler := handler.NewIndustryNewsImageHandler(industryNewsImageService)
 	dashboardHandler := handler.NewDashboardHandler(dashboardService)
 	redirectHandler := handler.NewRedirectHandler(redirectService)
 	orderHandler := handler.NewOrderHandler(orderService)
@@ -259,6 +265,7 @@ func main() {
 	v1.Get("/categories/:slug/reports", reportHandler.GetByCategorySlug)
 	v1.Get("/categories/:slug/blogs", blogHandler.GetByCategorySlug)
 	v1.Get("/categories/:slug/press-releases", pressReleaseHandler.GetByCategorySlug)
+	v1.Get("/categories/:slug/industry-news", industryNewsHandler.GetByCategorySlug)
 	v1.Post("/categories/:id/image", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), categoryHandler.UploadImage)
 
 	// Author routes (public read, protected write)
@@ -336,10 +343,31 @@ func main() {
 	v1.Patch("/press-releases/:id/schedule", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), pressReleaseHandler.SchedulePublish)
 	v1.Patch("/press-releases/:id/cancel-schedule", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), pressReleaseHandler.CancelScheduledPublish)
 
+	// Industry News routes
+	v1.Get("/industry-news", industryNewsHandler.GetAll)
+	v1.Get("/industry-news/slug/:slug", industryNewsHandler.GetBySlug)
+	v1.Get("/industry-news/images/:imageId", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), industryNewsImageHandler.GetByID)
+	v1.Patch("/industry-news/images/:imageId", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), industryNewsImageHandler.UpdateMetadata)
+	v1.Delete("/industry-news/images/:imageId", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), industryNewsImageHandler.DeleteImage)
+	v1.Get("/industry-news/:id", industryNewsHandler.GetByID)
+	v1.Post("/industry-news", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), industryNewsHandler.Create)
+	v1.Put("/industry-news/:id", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), industryNewsHandler.Update)
+	v1.Delete("/industry-news/:id", middleware.RequireAuth(authService), middleware.RequireRole("admin"), industryNewsHandler.Delete)
+	v1.Patch("/industry-news/:id/submit-review", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), industryNewsHandler.SubmitForReview)
+	v1.Patch("/industry-news/:id/publish", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), industryNewsHandler.Publish)
+	v1.Patch("/industry-news/:id/unpublish", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), industryNewsHandler.Unpublish)
+	v1.Patch("/industry-news/:id/soft-delete", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), industryNewsHandler.SoftDelete)
+	v1.Patch("/industry-news/:id/restore", middleware.RequireAuth(authService), middleware.RequireRole("admin"), industryNewsHandler.Restore)
+	v1.Patch("/industry-news/:id/schedule", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), industryNewsHandler.SchedulePublish)
+	v1.Patch("/industry-news/:id/cancel-schedule", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), industryNewsHandler.CancelScheduledPublish)
+	v1.Post("/industry-news/:newsId/images", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), industryNewsImageHandler.UploadImage)
+	v1.Get("/industry-news/:newsId/images", middleware.RequireAuth(authService), middleware.RequireRole("admin", "editor"), industryNewsImageHandler.ListImages)
+
 	// Sitemap routes (public, high-limit endpoints for sitemap generation)
 	v1.Get("/sitemap/reports", reportHandler.GetSitemap)
 	v1.Get("/sitemap/blogs", blogHandler.GetSitemap)
 	v1.Get("/sitemap/press-releases", pressReleaseHandler.GetSitemap)
+	v1.Get("/sitemap/industry-news", industryNewsHandler.GetSitemap)
 
 	// Redirect routes
 	// Public endpoints (no auth required)

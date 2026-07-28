@@ -17,6 +17,7 @@ type schedulerService struct {
 	reportRepo       repository.ReportRepository
 	blogRepo         repository.BlogRepository
 	pressReleaseRepo repository.PressReleaseRepository
+	industryNewsRepo repository.IndustryNewsRepository
 	ticker           *time.Ticker
 	stopCh           chan struct{}
 }
@@ -25,11 +26,13 @@ func NewSchedulerService(
 	reportRepo repository.ReportRepository,
 	blogRepo repository.BlogRepository,
 	pressReleaseRepo repository.PressReleaseRepository,
+	industryNewsRepo repository.IndustryNewsRepository,
 ) SchedulerService {
 	return &schedulerService{
 		reportRepo:       reportRepo,
 		blogRepo:         blogRepo,
 		pressReleaseRepo: pressReleaseRepo,
+		industryNewsRepo: industryNewsRepo,
 		stopCh:           make(chan struct{}),
 	}
 }
@@ -67,6 +70,10 @@ func (s *schedulerService) processScheduledPublishes() {
 
 	if err := s.pressReleaseRepo.PublishScheduled(now); err != nil {
 		logger.Error("Failed to publish scheduled press releases", "error", err)
+	}
+
+	if err := s.industryNewsRepo.PublishScheduled(now); err != nil {
+		logger.Error("Failed to publish scheduled industry news", "error", err)
 	}
 }
 
