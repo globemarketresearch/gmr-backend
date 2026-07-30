@@ -2,9 +2,12 @@ package service
 
 import (
 	"errors"
+	"mime/multipart"
 	"testing"
+	"time"
 
 	"github.com/healthcare-market-research/backend/internal/domain/report"
+	"github.com/healthcare-market-research/backend/internal/repository"
 )
 
 // Mock ReportImageRepository for testing
@@ -100,7 +103,7 @@ func (m *mockReportRepository) GetAll(page, limit int) ([]report.Report, int64, 
 	return nil, 0, nil
 }
 
-func (m *mockReportRepository) GetAllWithFilters(filters interface{}) ([]report.Report, int64, error) {
+func (m *mockReportRepository) GetAllWithFilters(filters repository.ReportFilters) ([]report.Report, int64, error) {
 	return nil, 0, nil
 }
 
@@ -113,6 +116,10 @@ func (m *mockReportRepository) GetByIDWithRelations(id uint) (*report.ReportWith
 }
 
 func (m *mockReportRepository) GetByCategorySlug(categorySlug string, page, limit int) ([]report.Report, int64, error) {
+	return nil, 0, nil
+}
+
+func (m *mockReportRepository) GetByAuthorID(authorID uint, page, limit int) ([]report.Report, int64, error) {
 	return nil, 0, nil
 }
 
@@ -134,6 +141,42 @@ func (m *mockReportRepository) Update(report *report.Report) error {
 
 func (m *mockReportRepository) Delete(id uint) error {
 	return nil
+}
+
+func (m *mockReportRepository) SoftDelete(id uint) error {
+	return nil
+}
+
+func (m *mockReportRepository) Restore(id uint) error {
+	return nil
+}
+
+func (m *mockReportRepository) CreateVersion(version *report.ReportVersion) error {
+	return nil
+}
+
+func (m *mockReportRepository) GetVersionsByReportID(reportID uint) ([]report.ReportVersion, error) {
+	return nil, nil
+}
+
+func (m *mockReportRepository) GetLatestVersionNumber(reportID uint) (int, error) {
+	return 0, nil
+}
+
+func (m *mockReportRepository) PublishScheduled(now time.Time) error {
+	return nil
+}
+
+func (m *mockReportRepository) SchedulePublish(id uint, publishDate time.Time) error {
+	return nil
+}
+
+func (m *mockReportRepository) CancelScheduledPublish(id uint) error {
+	return nil
+}
+
+func (m *mockReportRepository) GetLinkSuggestions() ([]report.LinkSuggestionItem, error) {
+	return nil, nil
 }
 
 func TestReportImageService_UploadImage_Success(t *testing.T) {
@@ -169,7 +212,7 @@ func TestReportImageService_UploadImage_Success(t *testing.T) {
 	}
 
 	mockCloudflare := &mockCloudflareService{
-		uploadFunc: func(file interface{}, metadata map[string]string) (string, error) {
+		uploadFunc: func(file *multipart.FileHeader, metadata map[string]string) (string, error) {
 			if metadata["report_id"] != "1" {
 				t.Errorf("Expected report_id metadata '1', got '%s'", metadata["report_id"])
 			}
@@ -215,7 +258,7 @@ func TestReportImageService_UploadImage_WithoutTitle(t *testing.T) {
 
 	mockReportRepo := &mockReportRepository{}
 	mockCloudflare := &mockCloudflareService{
-		uploadFunc: func(file interface{}, metadata map[string]string) (string, error) {
+		uploadFunc: func(file *multipart.FileHeader, metadata map[string]string) (string, error) {
 			return uploadedImageURL, nil
 		},
 	}
@@ -259,7 +302,7 @@ func TestReportImageService_UploadImage_CloudflareUploadFails(t *testing.T) {
 		},
 	}
 	mockCloudflare := &mockCloudflareService{
-		uploadFunc: func(file interface{}, metadata map[string]string) (string, error) {
+		uploadFunc: func(file *multipart.FileHeader, metadata map[string]string) (string, error) {
 			return "", errors.New("cloudflare API error")
 		},
 	}
@@ -290,7 +333,7 @@ func TestReportImageService_UploadImage_DatabaseCreateFails_Rollback(t *testing.
 	}
 
 	mockCloudflare := &mockCloudflareService{
-		uploadFunc: func(file interface{}, metadata map[string]string) (string, error) {
+		uploadFunc: func(file *multipart.FileHeader, metadata map[string]string) (string, error) {
 			return uploadedImageURL, nil
 		},
 		deleteFunc: func(imageURL string) error {

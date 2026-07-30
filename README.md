@@ -216,6 +216,33 @@ The database includes the following tables:
 
 All tables include proper indexes for optimal query performance.
 
+## Database migrations
+
+GORM's `AutoMigrate` (run on startup) keeps table/column shapes in sync automatically, but it does **not** apply everything a migration might contain — notably CHECK constraints, custom/composite indexes, and seed data. Those live in `migrations/*.sql` and must be applied by hand against the target Postgres database.
+
+Run each file in numeric order:
+```bash
+psql "$DATABASE_URL" -f migrations/001_initial_schema.sql
+psql "$DATABASE_URL" -f migrations/002_add_admin_fields.sql
+# ... continue in order through the latest migration (currently 030_create_industry_news_tables.sql)
+```
+
+Or, to apply everything that hasn't been run yet in one go:
+```bash
+for f in migrations/*.sql; do
+  psql "$DATABASE_URL" -f "$f"
+done
+```
+
+There is currently no migration-tracking table, so migrations are not automatically skipped if already applied — re-running an already-applied file may fail on constraints/objects that already exist. Track what has been run manually when applying to a new environment.
+
+**`030_create_industry_news_tables.sql` is required for the Industry News feature.** `AutoMigrate` alone will create the `industry_news` and `industry_news_images` tables/columns, but this migration additionally:
+- seeds the default "Globe Market Research" author used when an article has no explicit author,
+- adds CHECK constraints not expressible via GORM struct tags, and
+- adds indexes needed for the feature's query patterns.
+
+Skipping it will leave the feature schema present but missing constraints, indexes, and the seeded author.
+
 ## Caching Strategy
 
 - **Cache Provider**: Redis

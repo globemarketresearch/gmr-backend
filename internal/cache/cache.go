@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -15,6 +16,13 @@ import (
 var Client *redis.Client
 var ctx = context.Background()
 var sfGroup singleflight.Group
+
+// ErrCacheUnavailable is returned by cache operations when no Redis client
+// has been configured (e.g. cache.Connect was never called, such as in unit
+// tests that construct services directly against mocked repositories).
+// Callers that go through GetOrSet treat this the same as a cache miss and
+// fall back to fetching fresh data.
+var ErrCacheUnavailable = errors.New("cache: redis client not configured")
 
 func Connect(cfg *config.Config) error {
 	Client = redis.NewClient(&redis.Options{
@@ -33,6 +41,9 @@ func Connect(cfg *config.Config) error {
 }
 
 func Set(key string, value interface{}, ttl time.Duration) error {
+	if Client == nil {
+		return ErrCacheUnavailable
+	}
 	data, err := json.Marshal(value)
 	if err != nil {
 		return err
@@ -41,6 +52,9 @@ func Set(key string, value interface{}, ttl time.Duration) error {
 }
 
 func Get(key string, dest interface{}) error {
+	if Client == nil {
+		return ErrCacheUnavailable
+	}
 	data, err := Client.Get(ctx, key).Result()
 	if err != nil {
 		return err
@@ -49,10 +63,16 @@ func Get(key string, dest interface{}) error {
 }
 
 func Delete(key string) error {
+	if Client == nil {
+		return ErrCacheUnavailable
+	}
 	return Client.Del(ctx, key).Err()
 }
 
 func DeletePattern(pattern string) error {
+	if Client == nil {
+		return ErrCacheUnavailable
+	}
 	var cursor uint64
 	for {
 		var keys []string

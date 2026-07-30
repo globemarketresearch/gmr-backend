@@ -2,19 +2,14 @@ package repository
 
 import (
 	"testing"
+	"time"
 
-	"github.com/google/uuid"
 	"github.com/healthcare-market-research/backend/internal/domain/form"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
-
-// Helper function to create uint64 pointers
-func uint64Ptr(v uint64) *uint64 {
-	return &v
-}
 
 func setupTestDB(t *testing.T) *gorm.DB {
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
@@ -24,21 +19,16 @@ func setupTestDB(t *testing.T) *gorm.DB {
 	err = db.AutoMigrate(&form.FormSubmission{})
 	require.NoError(t, err)
 
-	// Note: SQLite doesn't support sequences like PostgreSQL
-	// For testing purposes, we'll set tracking numbers manually
 	return db
 }
 
-func TestFormRepository_GetByTrackingNumber(t *testing.T) {
+func TestFormRepository_GetByID(t *testing.T) {
 	db := setupTestDB(t)
 	repo := NewFormRepository(db)
 
-	// Create test submissions
 	submission1 := &form.FormSubmission{
-		ID:             "sub_" + uuid.New().String(),
-		TrackingNumber: uint64Ptr(1),
-		Category:       form.CategoryContact,
-		Status:         form.StatusPending,
+		Category: form.CategoryContact,
+		Status:   form.StatusPending,
 		Data: form.FormData{
 			"fullName": "John Doe",
 			"email":    "john@example.com",
@@ -52,10 +42,8 @@ func TestFormRepository_GetByTrackingNumber(t *testing.T) {
 	require.NoError(t, err)
 
 	submission2 := &form.FormSubmission{
-		ID:             "sub_" + uuid.New().String(),
-		TrackingNumber: uint64Ptr(2),
-		Category:       form.CategoryRequestSample,
-		Status:         form.StatusPending,
+		Category: form.CategoryRequestSample,
+		Status:   form.StatusPending,
 		Data: form.FormData{
 			"fullName":    "Jane Smith",
 			"email":       "jane@example.com",
@@ -68,43 +56,37 @@ func TestFormRepository_GetByTrackingNumber(t *testing.T) {
 	err = repo.Create(submission2)
 	require.NoError(t, err)
 
-	// Test GetByTrackingNumber
-	t.Run("Successfully retrieve submission by tracking number", func(t *testing.T) {
-		result, err := repo.GetByTrackingNumber(1)
+	t.Run("Successfully retrieve submission by ID", func(t *testing.T) {
+		result, err := repo.GetByID(submission1.ID)
 		require.NoError(t, err)
 		assert.NotNil(t, result)
-		assert.Equal(t, uint64(1), *result.TrackingNumber)
 		assert.Equal(t, submission1.ID, result.ID)
 		assert.Equal(t, form.CategoryContact, result.Category)
 	})
 
-	t.Run("Retrieve second submission by tracking number", func(t *testing.T) {
-		result, err := repo.GetByTrackingNumber(2)
+	t.Run("Retrieve second submission by ID", func(t *testing.T) {
+		result, err := repo.GetByID(submission2.ID)
 		require.NoError(t, err)
 		assert.NotNil(t, result)
-		assert.Equal(t, uint64(2), *result.TrackingNumber)
 		assert.Equal(t, submission2.ID, result.ID)
 		assert.Equal(t, form.CategoryRequestSample, result.Category)
 	})
 
-	t.Run("Return error for non-existent tracking number", func(t *testing.T) {
-		result, err := repo.GetByTrackingNumber(999)
+	t.Run("Return error for non-existent ID", func(t *testing.T) {
+		result, err := repo.GetByID(999999)
 		assert.Error(t, err)
 		assert.Nil(t, result)
 	})
 }
 
-func TestFormRepository_GetAll_WithTrackingNumberFilter(t *testing.T) {
+func TestFormRepository_GetAll_WithCategoryFilter(t *testing.T) {
 	db := setupTestDB(t)
 	repo := NewFormRepository(db)
 
-	// Create test submissions
 	submissions := []*form.FormSubmission{
 		{
-			ID:             "sub_" + uuid.New().String(),
-			TrackingNumber: uint64Ptr(1),
-			Category:       form.CategoryContact,
-			Status:         form.StatusPending,
+			Category: form.CategoryContact,
+			Status:   form.StatusPending,
 			Data: form.FormData{
 				"fullName": "Test User 1",
 				"email":    "test1@example.com",
@@ -114,16 +96,14 @@ func TestFormRepository_GetAll_WithTrackingNumberFilter(t *testing.T) {
 			},
 		},
 		{
-			ID:             "sub_" + uuid.New().String(),
-			TrackingNumber: uint64Ptr(2),
-			Category:       form.CategoryContact,
-			Status:         form.StatusProcessed,
+			Category: form.CategoryRequestSample,
+			Status:   form.StatusProcessed,
 			Data: form.FormData{
-				"fullName": "Test User 2",
-				"email":    "test2@example.com",
-				"company":  "Company 2",
-				"subject":  "Subject 2",
-				"message":  "Message 2",
+				"fullName":    "Test User 2",
+				"email":       "test2@example.com",
+				"company":     "Company 2",
+				"jobTitle":    "Manager",
+				"reportTitle": "Report 2",
 			},
 		},
 	}
@@ -133,21 +113,21 @@ func TestFormRepository_GetAll_WithTrackingNumberFilter(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	t.Run("Filter by tracking number", func(t *testing.T) {
+	t.Run("Filter by category", func(t *testing.T) {
 		query := form.GetSubmissionsQuery{
-			TrackingNumber: uint64Ptr(1),
-			Page:           1,
-			Limit:          10,
+			Category: string(form.CategoryContact),
+			Page:     1,
+			Limit:    10,
 		}
 
 		results, total, err := repo.GetAll(query)
 		require.NoError(t, err)
 		assert.Equal(t, int64(1), total)
 		assert.Len(t, results, 1)
-		assert.Equal(t, uint64(1), *results[0].TrackingNumber)
+		assert.Equal(t, form.CategoryContact, results[0].Category)
 	})
 
-	t.Run("No tracking number filter returns all", func(t *testing.T) {
+	t.Run("No category filter returns all", func(t *testing.T) {
 		query := form.GetSubmissionsQuery{
 			Page:  1,
 			Limit: 10,
@@ -160,30 +140,19 @@ func TestFormRepository_GetAll_WithTrackingNumberFilter(t *testing.T) {
 	})
 }
 
-func TestFormRepository_GetAll_SortByTrackingNumber(t *testing.T) {
+func TestFormRepository_GetAll_SortByCreatedAt(t *testing.T) {
 	db := setupTestDB(t)
 	repo := NewFormRepository(db)
 
-	// Create test submissions with different tracking numbers
+	// CreatedAt is set explicitly (and spaced apart) so ordering assertions
+	// below are deterministic regardless of clock resolution; GORM only
+	// auto-populates CreatedAt when it is left as the zero value.
+	base := time.Now().Truncate(time.Second)
 	submissions := []*form.FormSubmission{
 		{
-			ID:             "sub_" + uuid.New().String(),
-			TrackingNumber: uint64Ptr(3),
-			Category:       form.CategoryContact,
-			Status:         form.StatusPending,
-			Data: form.FormData{
-				"fullName": "User C",
-				"email":    "c@example.com",
-				"company":  "Company C",
-				"subject":  "Subject C",
-				"message":  "Message C",
-			},
-		},
-		{
-			ID:             "sub_" + uuid.New().String(),
-			TrackingNumber: uint64Ptr(1),
-			Category:       form.CategoryContact,
-			Status:         form.StatusPending,
+			Category:  form.CategoryContact,
+			Status:    form.StatusPending,
+			CreatedAt: base,
 			Data: form.FormData{
 				"fullName": "User A",
 				"email":    "a@example.com",
@@ -193,16 +162,27 @@ func TestFormRepository_GetAll_SortByTrackingNumber(t *testing.T) {
 			},
 		},
 		{
-			ID:             "sub_" + uuid.New().String(),
-			TrackingNumber: uint64Ptr(2),
-			Category:       form.CategoryContact,
-			Status:         form.StatusPending,
+			Category:  form.CategoryContact,
+			Status:    form.StatusPending,
+			CreatedAt: base.Add(1 * time.Second),
 			Data: form.FormData{
 				"fullName": "User B",
 				"email":    "b@example.com",
 				"company":  "Company B",
 				"subject":  "Subject B",
 				"message":  "Message B",
+			},
+		},
+		{
+			Category:  form.CategoryContact,
+			Status:    form.StatusPending,
+			CreatedAt: base.Add(2 * time.Second),
+			Data: form.FormData{
+				"fullName": "User C",
+				"email":    "c@example.com",
+				"company":  "Company C",
+				"subject":  "Subject C",
+				"message":  "Message C",
 			},
 		},
 	}
@@ -212,11 +192,11 @@ func TestFormRepository_GetAll_SortByTrackingNumber(t *testing.T) {
 		require.NoError(t, err)
 	}
 
-	t.Run("Sort by tracking number ascending", func(t *testing.T) {
+	t.Run("Sort by createdAt ascending", func(t *testing.T) {
 		query := form.GetSubmissionsQuery{
 			Page:      1,
 			Limit:     10,
-			SortBy:    "trackingNumber",
+			SortBy:    "createdAt",
 			SortOrder: "asc",
 		}
 
@@ -224,16 +204,16 @@ func TestFormRepository_GetAll_SortByTrackingNumber(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, int64(3), total)
 		assert.Len(t, results, 3)
-		assert.Equal(t, uint64(1), *results[0].TrackingNumber)
-		assert.Equal(t, uint64(2), *results[1].TrackingNumber)
-		assert.Equal(t, uint64(3), *results[2].TrackingNumber)
+		assert.Equal(t, submissions[0].ID, results[0].ID)
+		assert.Equal(t, submissions[1].ID, results[1].ID)
+		assert.Equal(t, submissions[2].ID, results[2].ID)
 	})
 
-	t.Run("Sort by tracking number descending", func(t *testing.T) {
+	t.Run("Sort by createdAt descending", func(t *testing.T) {
 		query := form.GetSubmissionsQuery{
 			Page:      1,
 			Limit:     10,
-			SortBy:    "trackingNumber",
+			SortBy:    "createdAt",
 			SortOrder: "desc",
 		}
 
@@ -241,8 +221,8 @@ func TestFormRepository_GetAll_SortByTrackingNumber(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, int64(3), total)
 		assert.Len(t, results, 3)
-		assert.Equal(t, uint64(3), *results[0].TrackingNumber)
-		assert.Equal(t, uint64(2), *results[1].TrackingNumber)
-		assert.Equal(t, uint64(1), *results[2].TrackingNumber)
+		assert.Equal(t, submissions[2].ID, results[0].ID)
+		assert.Equal(t, submissions[1].ID, results[1].ID)
+		assert.Equal(t, submissions[0].ID, results[2].ID)
 	})
 }

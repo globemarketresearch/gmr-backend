@@ -4,29 +4,19 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/healthcare-market-research/backend/internal/domain/form"
+	"github.com/healthcare-market-research/backend/internal/domain/order"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"gorm.io/gorm"
 )
 
-// Helper function to create uint64 pointers
-func uint64Ptr(v uint64) *uint64 {
-	return &v
-}
-
-// MockFormRepository is a mock implementation of FormRepository
+// MockFormRepository is a mock implementation of repository.FormRepository.
 type MockFormRepository struct {
 	mock.Mock
 }
 
 func (m *MockFormRepository) Create(submission *form.FormSubmission) error {
 	args := m.Called(submission)
-	// Simulate database auto-generation of tracking number
-	if submission.TrackingNumber == nil {
-		submission.TrackingNumber = uint64Ptr(123) // Simulated auto-generated value
-	}
 	return args.Error(0)
 }
 
@@ -38,16 +28,8 @@ func (m *MockFormRepository) GetAll(query form.GetSubmissionsQuery) ([]form.Form
 	return args.Get(0).([]form.FormSubmission), int64(args.Int(1)), args.Error(2)
 }
 
-func (m *MockFormRepository) GetByID(id string) (*form.FormSubmission, error) {
+func (m *MockFormRepository) GetByID(id uint) (*form.FormSubmission, error) {
 	args := m.Called(id)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*form.FormSubmission), args.Error(1)
-}
-
-func (m *MockFormRepository) GetByTrackingNumber(trackingNumber uint64) (*form.FormSubmission, error) {
-	args := m.Called(trackingNumber)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -62,12 +44,12 @@ func (m *MockFormRepository) GetByCategory(category string, page, limit int) ([]
 	return args.Get(0).([]form.FormSubmission), int64(args.Int(1)), args.Error(2)
 }
 
-func (m *MockFormRepository) Delete(id string) error {
+func (m *MockFormRepository) Delete(id uint) error {
 	args := m.Called(id)
 	return args.Error(0)
 }
 
-func (m *MockFormRepository) BulkDelete(ids []string) (int64, error) {
+func (m *MockFormRepository) BulkDelete(ids []uint) (int64, error) {
 	args := m.Called(ids)
 	return int64(args.Int(0)), args.Error(1)
 }
@@ -80,14 +62,29 @@ func (m *MockFormRepository) GetStats() (*form.SubmissionStats, error) {
 	return args.Get(0).(*form.SubmissionStats), args.Error(1)
 }
 
-func (m *MockFormRepository) UpdateStatus(id string, status form.FormStatus, processedBy *uint) error {
+func (m *MockFormRepository) UpdateStatus(id uint, status form.FormStatus, processedBy *uint) error {
 	args := m.Called(id, status, processedBy)
 	return args.Error(0)
 }
 
-func TestFormService_Create_IncludesTrackingNumber(t *testing.T) {
+// mockEmailService is a no-op implementation of email.EmailService for tests.
+type mockEmailService struct{}
+
+func (m *mockEmailService) SendFormNotification(submission *form.FormSubmission) error {
+	return nil
+}
+
+func (m *mockEmailService) SendOrderConfirmation(o *order.Order) error {
+	return nil
+}
+
+func (m *mockEmailService) SendOrderAdminNotification(o *order.Order) error {
+	return nil
+}
+
+func TestFormService_Create_Success(t *testing.T) {
 	mockRepo := new(MockFormRepository)
-	service := NewFormService(mockRepo)
+	service := NewFormService(mockRepo, &mockEmailService{})
 
 	req := &form.CreateSubmissionRequest{
 		Category: form.CategoryContact,
@@ -107,22 +104,35 @@ func TestFormService_Create_IncludesTrackingNumber(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, response)
 	assert.True(t, response.Success)
-	assert.NotEmpty(t, response.SubmissionID)
-	assert.Equal(t, uint64(123), *response.TrackingNumber) // From mock
 	assert.Equal(t, form.CategoryContact, response.Category)
 
 	mockRepo.AssertExpectations(t)
 }
 
-func TestFormService_GetByTrackingNumber(t *testing.T) {
+func TestFormService_Create_InvalidCategory(t *testing.T) {
 	mockRepo := new(MockFormRepository)
-	service := NewFormService(mockRepo)
+	service := NewFormService(mockRepo, &mockEmailService{})
+
+	req := &form.CreateSubmissionRequest{
+		Category: form.FormCategory("not-a-real-category"),
+		Data:     form.FormData{},
+	}
+
+	response, err := service.Create(req)
+
+	assert.Error(t, err)
+	assert.Nil(t, response)
+	mockRepo.AssertNotCalled(t, "Create", mock.Anything)
+}
+
+func TestFormService_GetByID(t *testing.T) {
+	mockRepo := new(MockFormRepository)
+	service := NewFormService(mockRepo, &mockEmailService{})
 
 	expectedSubmission := &form.FormSubmission{
-		ID:             "sub_" + uuid.New().String(),
-		TrackingNumber: uint64Ptr(42),
-		Category:       form.CategoryContact,
-		Status:         form.StatusPending,
+		ID:       42,
+		Category: form.CategoryContact,
+		Status:   form.StatusPending,
 		Data: form.FormData{
 			"fullName": "Jane Smith",
 			"email":    "jane@example.com",
@@ -132,60 +142,47 @@ func TestFormService_GetByTrackingNumber(t *testing.T) {
 		},
 	}
 
-	t.Run("Successfully retrieve submission by tracking number", func(t *testing.T) {
-		mockRepo.On("GetByTrackingNumber", uint64(42)).Return(expectedSubmission, nil).Once()
+	t.Run("Successfully retrieve submission by ID", func(t *testing.T) {
+		mockRepo.On("GetByID", uint(42)).Return(expectedSubmission, nil).Once()
 
-		result, err := service.GetByTrackingNumber(42)
+		result, err := service.GetByID(42)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, result)
-		assert.Equal(t, uint64(42), *result.TrackingNumber)
 		assert.Equal(t, expectedSubmission.ID, result.ID)
 
 		mockRepo.AssertExpectations(t)
 	})
 
-	t.Run("Return error when tracking number not found", func(t *testing.T) {
-		mockRepo.On("GetByTrackingNumber", uint64(999)).Return(nil, gorm.ErrRecordNotFound).Once()
+	t.Run("Return error when submission not found", func(t *testing.T) {
+		mockRepo.On("GetByID", uint(999)).Return(nil, errors.New("record not found")).Once()
 
-		result, err := service.GetByTrackingNumber(999)
+		result, err := service.GetByID(999)
 
 		assert.Error(t, err)
 		assert.Nil(t, result)
-		assert.Equal(t, gorm.ErrRecordNotFound, err)
 
 		mockRepo.AssertExpectations(t)
 	})
 }
 
-func TestFormService_Delete_InvalidatesTrackingNumberCache(t *testing.T) {
+func TestFormService_Delete(t *testing.T) {
 	mockRepo := new(MockFormRepository)
-	service := NewFormService(mockRepo)
+	service := NewFormService(mockRepo, &mockEmailService{})
 
-	submissionID := "sub_" + uuid.New().String()
-	submission := &form.FormSubmission{
-		ID:             submissionID,
-		TrackingNumber: uint64Ptr(100),
-		Category:       form.CategoryContact,
-		Status:         form.StatusPending,
-	}
+	t.Run("Delete succeeds", func(t *testing.T) {
+		mockRepo.On("Delete", uint(1)).Return(nil).Once()
 
-	t.Run("Delete invalidates caches including tracking number", func(t *testing.T) {
-		mockRepo.On("GetByID", submissionID).Return(submission, nil).Once()
-		mockRepo.On("Delete", submissionID).Return(nil).Once()
-
-		err := service.Delete(submissionID)
+		err := service.Delete(1)
 
 		assert.NoError(t, err)
 		mockRepo.AssertExpectations(t)
-		// Note: Cache invalidation is tested implicitly - the GetByID call proves we're fetching the tracking number
 	})
 
 	t.Run("Delete handles error gracefully", func(t *testing.T) {
-		mockRepo.On("GetByID", submissionID).Return(submission, nil).Once()
-		mockRepo.On("Delete", submissionID).Return(errors.New("database error")).Once()
+		mockRepo.On("Delete", uint(2)).Return(errors.New("database error")).Once()
 
-		err := service.Delete(submissionID)
+		err := service.Delete(2)
 
 		assert.Error(t, err)
 		assert.Equal(t, "database error", err.Error())
@@ -193,32 +190,24 @@ func TestFormService_Delete_InvalidatesTrackingNumberCache(t *testing.T) {
 	})
 }
 
-func TestFormService_UpdateStatus_InvalidatesTrackingNumberCache(t *testing.T) {
+func TestFormService_UpdateStatus(t *testing.T) {
 	mockRepo := new(MockFormRepository)
-	service := NewFormService(mockRepo)
+	service := NewFormService(mockRepo, &mockEmailService{})
 
-	submissionID := "sub_" + uuid.New().String()
-	submission := &form.FormSubmission{
-		ID:             submissionID,
-		TrackingNumber: uint64Ptr(200),
-		Category:       form.CategoryContact,
-		Status:         form.StatusPending,
-	}
+	t.Run("UpdateStatus succeeds for a valid status", func(t *testing.T) {
+		mockRepo.On("UpdateStatus", uint(1), form.StatusProcessed, (*uint)(nil)).Return(nil).Once()
 
-	t.Run("UpdateStatus invalidates caches including tracking number", func(t *testing.T) {
-		mockRepo.On("GetByID", submissionID).Return(submission, nil).Once()
-		mockRepo.On("UpdateStatus", submissionID, form.StatusProcessed, (*uint)(nil)).Return(nil).Once()
-
-		err := service.UpdateStatus(submissionID, form.StatusProcessed, nil)
+		err := service.UpdateStatus(1, form.StatusProcessed, nil)
 
 		assert.NoError(t, err)
 		mockRepo.AssertExpectations(t)
 	})
 
 	t.Run("UpdateStatus validates status", func(t *testing.T) {
-		err := service.UpdateStatus(submissionID, form.FormStatus("invalid"), nil)
+		err := service.UpdateStatus(1, form.FormStatus("invalid"), nil)
 
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "invalid status")
+		mockRepo.AssertNotCalled(t, "UpdateStatus", uint(1), form.FormStatus("invalid"), (*uint)(nil))
 	})
 }

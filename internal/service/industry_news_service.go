@@ -76,7 +76,8 @@ func (s *industryNewsService) Create(req *industry_news.CreateIndustryNewsReques
 
 func (s *industryNewsService) GetAll(query industry_news.GetIndustryNewsQuery) ([]industry_news.IndustryNews, int64, error) {
 	shouldCache := query.Status == "" && query.CategoryID == "" && query.Tags == "" &&
-		query.AuthorID == "" && query.Location == "" && query.Search == ""
+		query.AuthorID == "" && query.Location == "" && query.Search == "" &&
+		query.CategorySlug == "" && query.Deleted == "" && query.SortBy == ""
 
 	if shouldCache {
 		cacheKey := fmt.Sprintf("industry_news:list:%d:%d", query.Page, query.Limit)

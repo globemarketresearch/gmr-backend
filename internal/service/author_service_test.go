@@ -42,6 +42,7 @@ func (m *mockCloudflareService) ExtractImageID(imageURL string) (string, error) 
 // Mock AuthorRepository for testing
 type mockAuthorRepository struct {
 	getByIDFunc             func(id uint) (*author.Author, error)
+	getByIDsFunc            func(ids []uint) ([]author.Author, error)
 	updateFunc              func(author *author.Author) error
 	deleteFunc              func(id uint) error
 	isReferencedInReportsFunc func(id uint) (bool, error)
@@ -52,6 +53,19 @@ func (m *mockAuthorRepository) GetByID(id uint) (*author.Author, error) {
 		return m.getByIDFunc(id)
 	}
 	return &author.Author{ID: id, Name: "Test Author"}, nil
+}
+
+// GetByIDs returns one mocked author per requested ID, mirroring GetByID's
+// default behavior when no getByIDsFunc override is provided.
+func (m *mockAuthorRepository) GetByIDs(ids []uint) ([]author.Author, error) {
+	if m.getByIDsFunc != nil {
+		return m.getByIDsFunc(ids)
+	}
+	authors := make([]author.Author, 0, len(ids))
+	for _, id := range ids {
+		authors = append(authors, author.Author{ID: id, Name: "Test Author"})
+	}
+	return authors, nil
 }
 
 func (m *mockAuthorRepository) Update(author *author.Author) error {

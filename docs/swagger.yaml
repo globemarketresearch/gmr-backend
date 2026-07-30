@@ -587,6 +587,213 @@ definitions:
       title:
         type: string
     type: object
+  industry_news.CreateIndustryNewsRequest:
+    properties:
+      authorId:
+        type: integer
+      categoryId:
+        type: integer
+      content:
+        minLength: 100
+        type: string
+      excerpt:
+        maxLength: 500
+        minLength: 50
+        type: string
+      location:
+        type: string
+      metadata:
+        $ref: '#/definitions/industry_news.IndustryNewsMetadata'
+      publishDate:
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/industry_news.IndustryNewsStatus'
+        enum:
+        - draft
+        - review
+        - published
+      tags:
+        type: string
+      title:
+        maxLength: 200
+        minLength: 10
+        type: string
+    required:
+    - authorId
+    - categoryId
+    - content
+    - excerpt
+    - publishDate
+    - status
+    - title
+    type: object
+  industry_news.IndustryNews:
+    properties:
+      author:
+        $ref: '#/definitions/author.Author'
+      authorId:
+        type: integer
+      category:
+        $ref: '#/definitions/category.Category'
+      categoryId:
+        type: integer
+      content:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      excerpt:
+        type: string
+      id:
+        type: integer
+      internalLinks:
+        items:
+          $ref: '#/definitions/industry_news.InternalLinkEntry'
+        type: array
+      location:
+        type: string
+      metadata:
+        $ref: '#/definitions/industry_news.IndustryNewsMetadata'
+      publishDate:
+        type: string
+      reviewedAt:
+        type: string
+      reviewedBy:
+        type: integer
+      scheduledPublishEnabled:
+        type: boolean
+      slug:
+        type: string
+      status:
+        $ref: '#/definitions/industry_news.IndustryNewsStatus'
+      tags:
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  industry_news.IndustryNewsImage:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      image_url:
+        type: string
+      industry_news:
+        $ref: '#/definitions/industry_news.IndustryNews'
+      industry_news_id:
+        type: integer
+      is_active:
+        type: boolean
+      title:
+        type: string
+      updated_at:
+        type: string
+      uploaded_by:
+        type: integer
+    type: object
+  industry_news.IndustryNewsListResponse:
+    properties:
+      industryNews:
+        items:
+          $ref: '#/definitions/industry_news.IndustryNews'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  industry_news.IndustryNewsMetadata:
+    properties:
+      keywords:
+        items:
+          type: string
+        type: array
+      metaDescription:
+        type: string
+      metaTitle:
+        type: string
+    type: object
+  industry_news.IndustryNewsResponse:
+    properties:
+      industryNews:
+        $ref: '#/definitions/industry_news.IndustryNews'
+    type: object
+  industry_news.IndustryNewsStatus:
+    enum:
+    - draft
+    - review
+    - published
+    type: string
+    x-enum-varnames:
+    - StatusDraft
+    - StatusReview
+    - StatusPublished
+  industry_news.InternalLinkEntry:
+    properties:
+      keyword:
+        type: string
+      linkedCount:
+        type: integer
+      targetId:
+        type: integer
+      targetTitle:
+        type: string
+      targetType:
+        description: '"report", "blog", "press-release", "industry-news"'
+        type: string
+      targetUrl:
+        type: string
+    type: object
+  industry_news.UpdateIndustryNewsRequest:
+    properties:
+      authorId:
+        type: integer
+      categoryId:
+        type: integer
+      content:
+        minLength: 100
+        type: string
+      excerpt:
+        maxLength: 500
+        minLength: 50
+        type: string
+      internalLinks:
+        items:
+          $ref: '#/definitions/industry_news.InternalLinkEntry'
+        type: array
+      location:
+        type: string
+      metadata:
+        $ref: '#/definitions/industry_news.IndustryNewsMetadata'
+      publishDate:
+        type: string
+      slug:
+        maxLength: 250
+        minLength: 1
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/industry_news.IndustryNewsStatus'
+        enum:
+        - draft
+        - review
+        - published
+      tags:
+        type: string
+      title:
+        maxLength: 200
+        minLength: 10
+        type: string
+    type: object
   mediamention.MediaMention:
     properties:
       createdAt:
@@ -3090,6 +3297,45 @@ paths:
       summary: Get blogs by category slug
       tags:
       - Blogs
+  /api/v1/categories/{slug}/industry-news:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of published industry news articles for a
+        specific category
+      parameters:
+      - description: Category slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 20, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of industry news articles with pagination
+          schema:
+            $ref: '#/definitions/industry_news.IndustryNewsListResponse'
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get industry news by category slug
+      tags:
+      - IndustryNews
   /api/v1/categories/{slug}/press-releases:
     get:
       consumes:
@@ -3680,6 +3926,1136 @@ paths:
       summary: Get submissions by category
       tags:
       - Forms
+  /api/v1/industry-news:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of industry news articles with optional filtering
+      parameters:
+      - description: 'Filter by status: draft, review, published'
+        in: query
+        name: status
+        type: string
+      - description: Filter by category ID
+        in: query
+        name: categoryId
+        type: integer
+      - description: Filter by category slug
+        in: query
+        name: category
+        type: string
+      - description: Filter by tags (comma-separated)
+        in: query
+        name: tags
+        type: string
+      - description: Filter by author ID
+        in: query
+        name: authorId
+        type: integer
+      - description: Filter by location
+        in: query
+        name: location
+        type: string
+      - description: Search in title, excerpt, content
+        in: query
+        name: search
+        type: string
+      - description: Set to 'true' to list soft-deleted (trashed) articles
+        in: query
+        name: deleted
+        type: string
+      - description: 'Sort order: publish_date_desc, created_at_desc, updated_at_desc'
+        in: query
+        name: sort_by
+        type: string
+      - description: 'Page number (default: 1, min: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 20, max: 100)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of industry news articles with pagination
+          schema:
+            $ref: '#/definitions/industry_news.IndustryNewsListResponse'
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get all industry news articles
+      tags:
+      - IndustryNews
+    post:
+      consumes:
+      - application/json
+      description: Create a new industry news article. Admin/editor only.
+      parameters:
+      - description: Industry news data
+        in: body
+        name: industryNews
+        required: true
+        schema:
+          $ref: '#/definitions/industry_news.CreateIndustryNewsRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Industry news article created successfully
+          schema:
+            $ref: '#/definitions/industry_news.IndustryNewsResponse'
+        "400":
+          description: Bad request - invalid input or validation error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Create industry news article
+      tags:
+      - IndustryNews
+  /api/v1/industry-news/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Hard delete an industry news article by ID. Admin only.
+      parameters:
+      - description: Industry news article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Industry news article deleted successfully
+        "400":
+          description: Bad request - invalid ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Industry news article not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Delete industry news article
+      tags:
+      - IndustryNews
+    get:
+      consumes:
+      - application/json
+      description: Get a single industry news article by ID
+      parameters:
+      - description: Industry news article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Industry news article details
+          schema:
+            $ref: '#/definitions/industry_news.IndustryNewsResponse'
+        "400":
+          description: Bad request - invalid ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Industry news article not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get industry news article by ID
+      tags:
+      - IndustryNews
+    put:
+      consumes:
+      - application/json
+      description: Update an existing industry news article. Admin/editor only.
+      parameters:
+      - description: Industry news article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Industry news update data
+        in: body
+        name: industryNews
+        required: true
+        schema:
+          $ref: '#/definitions/industry_news.UpdateIndustryNewsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Industry news article updated successfully
+          schema:
+            $ref: '#/definitions/industry_news.IndustryNewsResponse'
+        "400":
+          description: Bad request - invalid input or validation error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Industry news article not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Update industry news article
+      tags:
+      - IndustryNews
+  /api/v1/industry-news/{id}/cancel-schedule:
+    patch:
+      consumes:
+      - application/json
+      description: Cancel scheduled publishing for an industry news article. Admin/editor
+        only.
+      parameters:
+      - description: Industry news article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Schedule cancelled
+          schema:
+            $ref: '#/definitions/industry_news.IndustryNewsResponse'
+        "400":
+          description: Bad request
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Cancel scheduled publish
+      tags:
+      - IndustryNews
+  /api/v1/industry-news/{id}/publish:
+    patch:
+      consumes:
+      - application/json
+      description: Change industry news article status to published. Admin/editor
+        only.
+      parameters:
+      - description: Industry news article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Industry news article published successfully
+          schema:
+            $ref: '#/definitions/industry_news.IndustryNewsResponse'
+        "400":
+          description: Bad request - invalid ID or article cannot be published
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Industry news article not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Publish industry news article
+      tags:
+      - IndustryNews
+  /api/v1/industry-news/{id}/restore:
+    patch:
+      consumes:
+      - application/json
+      description: Restore a soft deleted industry news article by ID. Admin only.
+      parameters:
+      - description: Industry news article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Industry news article restored successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad request - invalid ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Restore industry news article
+      tags:
+      - IndustryNews
+  /api/v1/industry-news/{id}/schedule:
+    patch:
+      consumes:
+      - application/json
+      description: Schedule an industry news article to be published at a future date/time.
+        Admin/editor only.
+      parameters:
+      - description: Industry news article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Publish date
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Industry news article scheduled successfully
+          schema:
+            $ref: '#/definitions/industry_news.IndustryNewsResponse'
+        "400":
+          description: Bad request
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Schedule industry news publish
+      tags:
+      - IndustryNews
+  /api/v1/industry-news/{id}/soft-delete:
+    patch:
+      consumes:
+      - application/json
+      description: Soft delete an industry news article by ID (moves to trash). Admin/editor
+        only.
+      parameters:
+      - description: Industry news article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Industry news article moved to trash successfully
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad request - invalid ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Industry news article not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Soft delete industry news article
+      tags:
+      - IndustryNews
+  /api/v1/industry-news/{id}/submit-review:
+    patch:
+      consumes:
+      - application/json
+      description: Change industry news article status from draft to review. Admin/editor
+        only.
+      parameters:
+      - description: Industry news article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Industry news article submitted for review successfully
+          schema:
+            $ref: '#/definitions/industry_news.IndustryNewsResponse'
+        "400":
+          description: Bad request - invalid ID or article cannot be submitted
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Industry news article not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Submit industry news article for review
+      tags:
+      - IndustryNews
+  /api/v1/industry-news/{id}/unpublish:
+    patch:
+      consumes:
+      - application/json
+      description: Change industry news article status from published back to draft.
+        Admin/editor only.
+      parameters:
+      - description: Industry news article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Industry news article unpublished successfully
+          schema:
+            $ref: '#/definitions/industry_news.IndustryNewsResponse'
+        "400":
+          description: Bad request - invalid ID or article is not published
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Industry news article not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Unpublish industry news article
+      tags:
+      - IndustryNews
+  /api/v1/industry-news/{newsId}/images:
+    get:
+      consumes:
+      - application/json
+      description: Get all images for an industry news article with optional active
+        filter. Admin/editor only.
+      parameters:
+      - description: Industry news article ID
+        in: path
+        name: newsId
+        required: true
+        type: integer
+      - description: Filter by active status (true = only active images)
+        in: query
+        name: active
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of images
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/industry_news.IndustryNewsImage'
+                  type: array
+              type: object
+        "400":
+          description: Bad request - invalid industry news ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: List industry news images
+      tags:
+      - Industry News Images
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload an image for an industry news article (for use in the content
+        editor). Admin/editor only.
+      parameters:
+      - description: Industry news article ID
+        in: path
+        name: newsId
+        required: true
+        type: integer
+      - description: 'Image file (max 10MB, allowed types: JPEG, PNG, WebP, GIF)'
+        in: formData
+        name: image
+        required: true
+        type: file
+      - description: Image title (optional, max 255 chars)
+        in: formData
+        name: title
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Image uploaded successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/industry_news.IndustryNewsImage'
+              type: object
+        "400":
+          description: Bad request - invalid input or validation error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Industry news article not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Upload industry news image
+      tags:
+      - Industry News Images
+  /api/v1/industry-news/images/{imageId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an industry news image. Admin/editor only.
+      parameters:
+      - description: Image ID
+        in: path
+        name: imageId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Image deleted successfully
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: string
+                  type: object
+              type: object
+        "400":
+          description: Bad request - invalid image ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Image not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Delete industry news image
+      tags:
+      - Industry News Images
+    get:
+      consumes:
+      - application/json
+      description: Get a single industry news image by ID. Admin/editor only.
+      parameters:
+      - description: Image ID
+        in: path
+        name: imageId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Image details
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/industry_news.IndustryNewsImage'
+              type: object
+        "400":
+          description: Bad request - invalid image ID
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Image not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get single industry news image
+      tags:
+      - Industry News Images
+    patch:
+      consumes:
+      - application/json
+      description: Update image title and/or is_active status. Supports partial updates.
+        Admin/editor only.
+      parameters:
+      - description: Image ID
+        in: path
+        name: imageId
+        required: true
+        type: integer
+      - description: Metadata to update (all fields are optional for partial updates)
+        in: body
+        name: metadata
+        required: true
+        schema:
+          $ref: '#/definitions/handler.UpdateImageMetadataRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated image
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/industry_news.IndustryNewsImage'
+              type: object
+        "400":
+          description: Bad request - invalid input or validation error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "401":
+          description: Unauthorized - authentication required
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "403":
+          description: Forbidden - requires admin or editor role
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Image not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Update industry news image metadata
+      tags:
+      - Industry News Images
+  /api/v1/industry-news/slug/{slug}:
+    get:
+      consumes:
+      - application/json
+      description: Get a single industry news article by slug
+      parameters:
+      - description: Industry news article slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Industry news article details
+          schema:
+            $ref: '#/definitions/industry_news.IndustryNewsResponse'
+        "400":
+          description: Bad request - invalid slug
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+        "404":
+          description: Industry news article not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get industry news article by slug
+      tags:
+      - IndustryNews
   /api/v1/media-mentions:
     get:
       consumes:
@@ -6595,6 +7971,40 @@ paths:
       summary: Get published blog slugs for sitemap generation
       tags:
       - Blogs
+  /api/v1/sitemap/industry-news:
+    get:
+      consumes:
+      - application/json
+      description: Returns paginated slugs and dates for published industry news articles
+        (up to 1000 per page). Intended for sitemap generation only.
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Items per page (default: 1000, max: 1000)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Sitemap data
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal server error
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                error:
+                  type: string
+              type: object
+      summary: Get published industry news slugs for sitemap generation
+      tags:
+      - IndustryNews
   /api/v1/sitemap/press-releases:
     get:
       consumes:

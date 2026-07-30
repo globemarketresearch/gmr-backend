@@ -1,7 +1,10 @@
 package repository
 
 import (
+	"fmt"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/healthcare-market-research/backend/internal/domain/report"
 	"github.com/stretchr/testify/assert"
@@ -21,11 +24,18 @@ func setupReportImageTestDB(t *testing.T) *gorm.DB {
 	return db
 }
 
+// testReportSlugCounter guarantees a unique Slug (which has a DB-level
+// uniqueIndex) each time createTestReport is called, including multiple
+// calls within the same test function/DB.
+var testReportSlugCounter int64
+
 func createTestReport(t *testing.T, db *gorm.DB) uint {
+	n := atomic.AddInt64(&testReportSlugCounter, 1)
 	testReport := &report.Report{
 		Title:       "Test Report",
+		Slug:        fmt.Sprintf("test-report-%d", n),
 		Description: "Test Description",
-		Status:      report.StatusDraft,
+		Status:      "draft",
 	}
 	err := db.Create(testReport).Error
 	require.NoError(t, err)
@@ -92,6 +102,11 @@ func TestReportImageRepository_FindByReportID(t *testing.T) {
 	repo := NewReportImageRepository(db)
 	reportID := createTestReport(t, db)
 
+	// CreatedAt is set explicitly (and spaced apart) so the created_at DESC
+	// ordering assertions below are deterministic regardless of clock
+	// resolution; GORM only auto-populates CreatedAt when it is left as the
+	// zero value.
+	base := time.Now().Truncate(time.Second)
 	userID := uint(5)
 	images := []*report.ReportImage{
 		{
@@ -100,6 +115,7 @@ func TestReportImageRepository_FindByReportID(t *testing.T) {
 			Title:      "Image 1",
 			IsActive:   true,
 			UploadedBy: &userID,
+			CreatedAt:  base,
 		},
 		{
 			ReportID:   reportID,
@@ -107,6 +123,7 @@ func TestReportImageRepository_FindByReportID(t *testing.T) {
 			Title:      "Image 2",
 			IsActive:   false,
 			UploadedBy: &userID,
+			CreatedAt:  base.Add(1 * time.Second),
 		},
 		{
 			ReportID:   reportID,
@@ -114,6 +131,7 @@ func TestReportImageRepository_FindByReportID(t *testing.T) {
 			Title:      "Image 3",
 			IsActive:   true,
 			UploadedBy: &userID,
+			CreatedAt:  base.Add(2 * time.Second),
 		},
 	}
 
@@ -145,6 +163,11 @@ func TestReportImageRepository_FindActiveByReportID(t *testing.T) {
 	repo := NewReportImageRepository(db)
 	reportID := createTestReport(t, db)
 
+	// CreatedAt is set explicitly (and spaced apart) so the created_at DESC
+	// ordering assertions below are deterministic regardless of clock
+	// resolution; GORM only auto-populates CreatedAt when it is left as the
+	// zero value.
+	base := time.Now().Truncate(time.Second)
 	userID := uint(5)
 	images := []*report.ReportImage{
 		{
@@ -153,6 +176,7 @@ func TestReportImageRepository_FindActiveByReportID(t *testing.T) {
 			Title:      "Active Image 1",
 			IsActive:   true,
 			UploadedBy: &userID,
+			CreatedAt:  base,
 		},
 		{
 			ReportID:   reportID,
@@ -160,6 +184,7 @@ func TestReportImageRepository_FindActiveByReportID(t *testing.T) {
 			Title:      "Inactive Image",
 			IsActive:   false,
 			UploadedBy: &userID,
+			CreatedAt:  base.Add(1 * time.Second),
 		},
 		{
 			ReportID:   reportID,
@@ -167,6 +192,7 @@ func TestReportImageRepository_FindActiveByReportID(t *testing.T) {
 			Title:      "Active Image 2",
 			IsActive:   true,
 			UploadedBy: &userID,
+			CreatedAt:  base.Add(2 * time.Second),
 		},
 	}
 
