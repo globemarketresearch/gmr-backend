@@ -92,7 +92,7 @@ func buildClientConfirmationEmail(submission *form.FormSubmission) (subject, bod
 <body style="font-family:Arial,sans-serif;color:#333;max-width:600px;margin:0 auto;padding:20px">
   <h2 style="color:#1a73e8">Sample Request Received</h2>
   <p>Dear %s,</p>
-  <p>Thank you for your interest in <strong>%s</strong>. We have received your sample request and will send the sample report to your email within 1–2 business days.</p>
+  <p>Thank you for your interest in <strong>%s</strong>. Your inquiry has been received, and a dedicated Sales Manager will be in contact with you shortly to discuss your requirements and assist you with the next steps.</p>
   <p>Your reference number is <strong>#%d</strong>. Please keep it for your records.</p>
   <p>For any questions, contact us at <a href="mailto:sales@globemarketresearch.com">sales@globemarketresearch.com</a>.</p>
   <p>Thank you for choosing Globe Market Research!</p>
