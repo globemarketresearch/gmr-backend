@@ -29,6 +29,7 @@ type Order struct {
 	ReportID             uint           `gorm:"not null"                                  json:"report_id"`
 	ReportTitle          string         `gorm:"size:500;not null"                         json:"report_title"`
 	ReportSlug           string         `gorm:"size:500;not null"                         json:"report_slug"`
+	LicenseType          string         `gorm:"size:50"                                   json:"license_type,omitempty"`
 	Amount               float64        `gorm:"type:decimal(10,2);not null"               json:"amount"`
 	Currency             string         `gorm:"size:3;not null;default:USD"               json:"currency"`
 	PaymentMethod        string         `gorm:"size:20;not null;default:paypal"           json:"payment_method"`
@@ -54,6 +55,9 @@ type CreateOrderRequest struct {
 	CustomerPhone   string `json:"customer_phone"`
 	CustomerCountry string `json:"customer_country"`
 	ReportSlug      string `json:"report_slug"      validate:"required"`
+	// LicenseID selects the license tier (single, corporate, excel). The price
+	// is looked up server-side from this ID; when empty the report price is used.
+	LicenseID string `json:"license_id"`
 	// PaymentMethod selects the payment gateway: "paypal" (default) or "stripe".
 	PaymentMethod string `json:"payment_method"`
 }

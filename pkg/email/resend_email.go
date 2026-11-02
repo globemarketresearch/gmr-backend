@@ -91,7 +91,7 @@ func (r *resendEmailService) SendOrderConfirmation(o *order.Order) error {
 </html>`,
 		o.CustomerName,
 		o.ID,
-		o.ReportTitle,
+		reportLabel(o),
 		o.Currency,
 		o.Amount,
 		o.CreatedAt.Format("January 2, 2006"),
@@ -140,7 +140,7 @@ func (r *resendEmailService) SendOrderAdminNotification(o *order.Order) error {
 		o.CustomerPhone,
 		o.CustomerCountry,
 		o.ID,
-		o.ReportTitle,
+		reportLabel(o),
 		o.Currency,
 		o.Amount,
 		derefStr(o.PaypalOrderID),
@@ -153,4 +153,12 @@ func (r *resendEmailService) SendOrderAdminNotification(o *order.Order) error {
 		return fmt.Errorf("resend order admin notification: %w", err)
 	}
 	return nil
+}
+
+// reportLabel returns the report title with the purchased license tier, if any.
+func reportLabel(o *order.Order) string {
+	if t, ok := order.GetLicenseTier(o.LicenseType); ok {
+		return o.ReportTitle + " — " + t.Name
+	}
+	return o.ReportTitle
 }

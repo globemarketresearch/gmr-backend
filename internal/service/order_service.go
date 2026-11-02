@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/healthcare-market-research/backend/internal/domain/order"
 	"github.com/healthcare-market-research/backend/internal/repository"
@@ -70,17 +71,32 @@ func (s *orderService) CreateOrder(req *order.CreateOrderRequest) (*order.Create
 		return nil, fmt.Errorf("report not found: %s", req.ReportSlug)
 	}
 
-	// Use discounted price if available, else regular price
-	price := report.Price
-	if report.DiscountedPrice > 0 {
-		price = report.DiscountedPrice
+	// Price is resolved server-side: from the license tier when one is given
+	// (this is what the checkout page displays), otherwise from the report.
+	var price float64
+	licenseType := ""
+	descSuffix := ""
+	if req.LicenseID != "" {
+		tier, ok := order.GetLicenseTier(req.LicenseID)
+		if !ok {
+			return nil, fmt.Errorf("license %q is not available for online purchase", req.LicenseID)
+		}
+		price = tier.Price
+		licenseType = tier.ID
+		descSuffix = " (" + tier.Name + ")"
+	} else {
+		price = report.Price
+		if report.DiscountedPrice > 0 {
+			price = report.DiscountedPrice
+		}
 	}
 
 	if price <= 0 {
 		return nil, fmt.Errorf("report does not have a valid price")
 	}
 
-	description := fmt.Sprintf("Healthcare Market Research Report: %s", report.Title)
+	// PayPal rejects purchase_unit descriptions longer than 127 characters.
+	description := truncateRunes(report.Title, 127-len([]rune(descSuffix))) + descSuffix
 
 	o := &order.Order{
 		CustomerName:    req.CustomerName,
@@ -91,6 +107,7 @@ func (s *orderService) CreateOrder(req *order.CreateOrderRequest) (*order.Create
 		ReportID:        uint(report.ID),
 		ReportTitle:     report.Title,
 		ReportSlug:      report.Slug,
+		LicenseType:     licenseType,
 		Amount:          price,
 		Currency:        "USD",
 		PaymentMethod:   paymentMethod,
@@ -148,7 +165,19 @@ func (s *orderService) CaptureOrder(orderID uint) (*order.CaptureOrderResponse, 
 	// Capture the PayPal payment
 	captureID, captureStatus, err := s.paypalClient.CaptureOrder(*o.PaypalOrderID)
 	if err != nil {
+		logger.Error("PayPal capture failed", "order_id", o.ID, "paypal_order_id", *o.PaypalOrderID, "error", err)
 		return nil, fmt.Errorf("PayPal capture failed: %w", err)
+	}
+
+	// Only COMPLETED means the money has moved. PENDING (e.g. eCheck or
+	// payment review) must not be treated as paid.
+	if captureStatus != "COMPLETED" {
+		logger.Warn("PayPal capture not completed", "order_id", o.ID, "capture_id", captureID, "capture_status", captureStatus)
+		if captureID != "" {
+			_ = s.repo.UpdateStatus(o.ID, order.StatusPendingPayment, captureID,
+				fmt.Sprintf("PayPal capture %s returned status %s; verify in PayPal dashboard", captureID, captureStatus), nil)
+		}
+		return nil, fmt.Errorf("payment is %s with PayPal; we will confirm by email once it clears", strings.ToLower(captureStatus))
 	}
 
 	// Update DB status
@@ -330,4 +359,16 @@ func (s *orderService) UpdateStatus(id uint, req *order.UpdateStatusRequest, upd
 	}
 
 	return s.repo.UpdateStatus(id, req.Status, "", req.AdminNotes, updatedBy)
+}
+
+// truncateRunes shortens s to at most n runes, appending "..." when cut.
+func truncateRunes(s string, n int) string {
+	r := []rune(s)
+	if len(r) <= n {
+		return s
+	}
+	if n <= 3 {
+		return string(r[:n])
+	}
+	return string(r[:n-3]) + "..."
 }

@@ -27,9 +27,24 @@ type Client struct {
 
 // NewClient creates a new PayPal client.
 func NewClient(cfg *config.PayPalConfig) *Client {
+	// PAYPAL_MODE=live switches to production; anything else is sandbox.
+	cfg.Mode = strings.ToLower(strings.TrimSpace(cfg.Mode))
+	if cfg.Mode != "live" {
+		if cfg.Mode != "sandbox" {
+			logger.Warn("PAYPAL_MODE not recognised, defaulting to sandbox", "value", cfg.Mode)
+		}
+		cfg.Mode = "sandbox"
+	}
+
 	baseURL := "https://api-m.sandbox.paypal.com"
 	if cfg.Mode == "live" {
 		baseURL = "https://api-m.paypal.com"
+	}
+
+	if cfg.ClientID == "" || cfg.ClientSecret == "" {
+		logger.Warn("PayPal credentials missing — PayPal checkout will fail", "mode", cfg.Mode)
+	} else {
+		logger.Info("PayPal client configured", "mode", cfg.Mode, "client_id_prefix", prefix(cfg.ClientID, 8))
 	}
 
 	return &Client{
@@ -194,4 +209,14 @@ func (c *Client) CaptureOrder(paypalOrderID string) (captureID string, status st
 
 	// Fallback: order-level status
 	return "", raw.Status, nil
+}
+
+// Mode returns the active environment: "sandbox" or "live".
+func (c *Client) Mode() string { return c.cfg.Mode }
+
+func prefix(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	return s[:n] + "…"
 }
