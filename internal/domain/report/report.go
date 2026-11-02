@@ -157,6 +157,9 @@ type LinkSuggestionItem struct {
 	Title        string `json:"title"`
 	Slug         string `json:"slug"`
 	MetaKeywords string `json:"meta_keywords"`
+	CategoryID   uint   `json:"category_id"`
+	// URL is the public report URL built from CLIENT_URL (not stored in DB).
+	URL string `json:"url" gorm:"-"`
 }
 
 // InternalLinkEntry represents a single internal link configuration
@@ -167,6 +170,7 @@ type InternalLinkEntry struct {
 	TargetType  string `json:"targetType"` // "report", "blog", "press-release"
 	TargetURL   string `json:"targetUrl"`
 	LinkedCount int    `json:"linkedCount"`
+	MatchType   string `json:"matchType,omitempty"` // auto-linker match tier (exact, close, keyword, …)
 }
 
 // InternalLinks is a slice of InternalLinkEntry with JSONB support

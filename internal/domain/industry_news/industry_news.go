@@ -27,6 +27,7 @@ type InternalLinkEntry struct {
 	TargetType  string `json:"targetType"` // "report", "blog", "press-release", "industry-news"
 	TargetURL   string `json:"targetUrl"`
 	LinkedCount int    `json:"linkedCount"`
+	MatchType   string `json:"matchType,omitempty"` // auto-linker match tier (exact, close, keyword, …)
 }
 
 // InternalLinks is a slice of InternalLinkEntry with JSONB support

@@ -491,7 +491,7 @@ func (r *reportRepository) CancelScheduledPublish(id uint) error {
 func (r *reportRepository) GetLinkSuggestions() ([]report.LinkSuggestionItem, error) {
 	var items []report.LinkSuggestionItem
 	err := r.db.Raw(`
-		SELECT id, title, slug, meta_keywords
+		SELECT id, title, slug, meta_keywords, category_id
 		FROM reports
 		WHERE status = 'published' AND deleted_at IS NULL
 		ORDER BY title

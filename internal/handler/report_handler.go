@@ -20,13 +20,15 @@ type ReportHandler struct {
 	service      service.ReportService
 	authorRepo   repository.AuthorRepository
 	auditService service.AuditService
+	clientURL    string // public site base URL (CLIENT_URL), used to build report links
 }
 
-func NewReportHandler(service service.ReportService, authorRepo repository.AuthorRepository, auditService service.AuditService) *ReportHandler {
+func NewReportHandler(service service.ReportService, authorRepo repository.AuthorRepository, auditService service.AuditService, clientURL string) *ReportHandler {
 	return &ReportHandler{
 		service:      service,
 		authorRepo:   authorRepo,
 		auditService: auditService,
+		clientURL:    strings.TrimRight(clientURL, "/"),
 	}
 }
 
@@ -765,6 +767,9 @@ func (h *ReportHandler) GetLinkSuggestions(c *fiber.Ctx) error {
 	items, err := h.service.GetLinkSuggestions()
 	if err != nil {
 		return response.InternalError(c, "Failed to fetch link suggestions")
+	}
+	for i := range items {
+		items[i].URL = h.clientURL + "/reports/" + items[i].Slug
 	}
 	return response.Success(c, items)
 }

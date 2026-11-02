@@ -174,7 +174,7 @@ func main() {
 	authHandler := handler.NewAuthHandler(authService, auditService)
 	userHandler := handler.NewUserHandler(userService, auditService)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
-	reportHandler := handler.NewReportHandler(reportService, authorRepo, auditService)
+	reportHandler := handler.NewReportHandler(reportService, authorRepo, auditService, cfg.Email.ClientURL)
 	authorHandler := handler.NewAuthorHandler(authorService)
 	mediaMentionHandler := handler.NewMediaMentionHandler(mediaMentionService, reportRepo)
 	auditHandler := handler.NewAuditHandler(auditService)
